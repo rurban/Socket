@@ -1,10 +1,11 @@
 package Socket;
-$VERSION = 1.3;
+
+use vars qw($VERSION @ISA @EXPORT);
+$VERSION = "1.5";
 
 =head1 NAME
 
-Socket, sockaddr_in, sockaddr_un, inet_aton, inet_ntoa - load the C
-    socket.h defines and structure manipulators 
+Socket, sockaddr_in, sockaddr_un, inet_aton, inet_ntoa - load the C socket.h defines and structure manipulators 
 
 =head1 SYNOPSIS
 
@@ -117,6 +118,7 @@ In an array context, unpacks its SOCKADDR_UN argument and returns an array
 consisting of (PATHNAME).  In a scalar context, packs its PATHANE
 arguments as a SOCKADDR_UN and returns it.  If this is confusing, use
 pack_sockaddr_un() and unpack_sockaddr_un() explicitly.
+These are only supported if your system has <sys/un.h>.
 
 =item pack_sockaddr_un PATH
 
@@ -227,32 +229,39 @@ require DynaLoader;
 sub sockaddr_in {
     if (@_ == 6 && !wantarray) { # perl5.001m compat; use this && die
 	my($af, $port, @quad) = @_;
+	carp "6-ARG sockaddr_in call is deprecated" if $^W;
 	pack_sockaddr_in($port, inet_aton(join('.', @quad)));
     } elsif (wantarray) {
-        unpack_sockaddr_in($_[0])
+	croak "usage:   (port,iaddr) = sockaddr_in(sin_sv)" unless @_ == 1;
+        unpack_sockaddr_in(@_);
     } else {
-        pack_sockaddr_in(@_[0,1])
+	croak "usage:   sin_sv = sockaddr_in(port,iaddr))" unless @_ == 2;
+        pack_sockaddr_in(@_);
     }
 }
 
 sub sockaddr_un {
-    wantarray 
-        ? unpack_sockaddr_un($_[0])
-        : pack_sockaddr_un($_[0])
+    if (wantarray) {
+	croak "usage:   (filename) = sockaddr_un(sun_sv)" unless @_ == 1;
+        unpack_sockaddr_un(@_);
+    } else {
+	croak "usage:   sun_sv = sockaddr_un(filename)" unless @_ == 1;
+        pack_sockaddr_un(@_);
+    }
 }
 
 
 sub AUTOLOAD {
-    local($constname);
+    my($constname);
     ($constname = $AUTOLOAD) =~ s/.*:://;
-    $val = constant($constname, @_ ? $_[0] : 0);
+    my $val = constant($constname, @_ ? $_[0] : 0);
     if ($! != 0) {
 	if ($! =~ /Invalid/) {
 	    $AutoLoader::AUTOLOAD = $AUTOLOAD;
 	    goto &AutoLoader::AUTOLOAD;
 	}
 	else {
-	    ($pack,$file,$line) = caller;
+	    my ($pack,$file,$line) = caller;
 	    croak "Your vendor has not defined Socket macro $constname, used";
 	}
     }
@@ -260,7 +269,7 @@ sub AUTOLOAD {
     goto &$AUTOLOAD;
 }
 
-bootstrap Socket;
+bootstrap Socket $VERSION;
 
 # Preloaded methods go here.  Autoload methods go after __END__, and are
 # processed by the autosplit program.
