@@ -1,2 +1,6 @@
 use ExtUtils::MakeMaker;
-WriteMakefile(VERSION => 1.3);
+WriteMakefile(
+    VERSION_FROM => 'Socket.pm',
+    MAN3PODS 	=> ' ', 	# Pods will be built by installman.
+    XSPROTOARG => '-noprototypes', 		# XXX remove later?
+);
