@@ -1,0 +1,12 @@
+Makefile.PL
+MANIFEST
+MANIFEST.SKIP
+MYMETA.yml
+Socket.pm
+Socket.xs
+t/getaddrinfo.t
+t/getnameinfo.t
+t/ipv6_mreq.t
+t/Socket.t
+t/socketpair.t
+META.yml                                 Module meta-data (added by MakeMaker)
