@@ -1,0 +1,10 @@
+\.bzr/
+\.bzrignore
+blib/
+const-.*\.inc
+Makefile$
+pm_to_blib
+.*\.bak
+.*\.bs
+.*\.c
+.*\.o
