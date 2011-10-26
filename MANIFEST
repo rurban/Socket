@@ -1,7 +1,6 @@
 Makefile.PL
 MANIFEST
 MANIFEST.SKIP
-MYMETA.yml
 Socket.pm
 Socket.xs
 t/getaddrinfo.t

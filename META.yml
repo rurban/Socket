@@ -1,12 +1,13 @@
 --- #YAML:1.0
 name:               Socket
-version:            1.94_03
+version:            1.94_04
 abstract:           ~
 author:  []
 license:            unknown
 distribution_type:  module
 configure_requires:
     ExtUtils::CChecker:  0
+    ExtUtils::Constant:  0.23
 build_requires:
     ExtUtils::MakeMaker:  0
 requires:  {}
@@ -14,7 +15,7 @@ no_index:
     directory:
         - t
         - inc
-generated_by:       ExtUtils::MakeMaker version 6.57_05
+generated_by:       ExtUtils::MakeMaker version 6.56
 meta-spec:
     url:      http://module-build.sourceforge.net/META-spec-v1.4.html
     version:  1.4
