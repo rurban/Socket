@@ -83,6 +83,7 @@ WriteMakefile(
     DEFINE       => join( " ", @DEFINES ),
     CONFIGURE_REQUIRES => {
 	'ExtUtils::CChecker' => 0,
+	'ExtUtils::Constant' => '0.23',
     },
 );
 my @names = (qw(AF_802 AF_AAL AF_APPLETALK AF_CCITT AF_CHAOS AF_CTF
