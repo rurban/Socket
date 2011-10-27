@@ -241,7 +241,6 @@ static SV *err_to_SV(pTHX_ int err)
 
 static void xs_getaddrinfo(pTHX_ CV *cv)
 {
-	dVAR;
 	dXSARGS;
 
 	SV   *host;
@@ -348,7 +347,6 @@ static void xs_getaddrinfo(pTHX_ CV *cv)
 #ifdef HAS_GETNAMEINFO
 static void xs_getnameinfo(pTHX_ CV *cv)
 {
-	dVAR;
 	dXSARGS;
 
 	SV  *addr;

@@ -1,0 +1,12 @@
+Revision history for Socket
+
+1.94_05 CHANGES:
+         * Don't actually need to dVAR in getaddrinfo/getnameinfo; might
+           improve portability to perl 5.8
+
+1.94_04 CHANGES:
+         * Declare configure-time dependency on ExtUtils::Constants 0.23
+
+1.94_03 CHANGES:
+         * Initial attempt at dual-life extraction from bleadperl
+
