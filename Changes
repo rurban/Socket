@@ -1,5 +1,9 @@
 Revision history for Socket
 
+1.94_06 CHANGES:
+         * Don't use croak_xs_usage because xsubpp doesn't create one before
+           perl 5.10
+
 1.94_05 CHANGES:
          * Don't actually need to dVAR in getaddrinfo/getnameinfo; might
            improve portability to perl 5.8
