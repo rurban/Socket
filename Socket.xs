@@ -257,7 +257,7 @@ static void xs_getaddrinfo(pTHX_ CV *cv)
 	int n_res;
 
 	if(items > 3)
-		croak_xs_usage(cv, "host, service, hints");
+		croak("Usage: Socket::getaddrinfo(host, service, hints)");
 
 	SP -= items;
 
@@ -359,7 +359,7 @@ static void xs_getnameinfo(pTHX_ CV *cv)
 	int err;
 
 	if(items < 1 || items > 2)
-		croak_xs_usage(cv, "addr, flags=0");
+		croak("Usage: Socket::getnameinfo(addr, flags=0)");
 
 	SP -= items;
 
