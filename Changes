@@ -1,5 +1,11 @@
 Revision history for Socket
 
+1.94_07 CHANGES:
+         * Implement the remaining AI_*, EAI_* and NI_* constants from
+           Socket::GetAddrInfo
+         * Bugfix to tests - only test inet_ntop with AF_INET6 if it's
+           actually supported
+
 1.94_06 CHANGES:
          * Don't use croak_xs_usage because xsubpp doesn't create one before
            perl 5.10
