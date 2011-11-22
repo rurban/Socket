@@ -163,7 +163,11 @@ SKIP: {
 
     is(inet_ntop(AF_INET, inet_pton(AF_INET, "10.20.30.40")), "10.20.30.40", 'inet_pton->inet_ntop AF_INET roundtrip');
     is(inet_ntop(AF_INET, inet_aton("10.20.30.40")), "10.20.30.40", 'inet_aton->inet_ntop AF_INET roundtrip');
-    is(lc inet_ntop(AF_INET6, inet_pton(AF_INET6, "2001:503:BA3E::2:30")), "2001:503:ba3e::2:30", 'inet_pton->inet_ntop AF_INET6 roundtrip');
+
+    SKIP: {
+	skip "No AF_INET6", 1 unless defined eval { AF_INET6() };
+	is(lc inet_ntop(AF_INET6, inet_pton(AF_INET6, "2001:503:BA3E::2:30")), "2001:503:ba3e::2:30", 'inet_pton->inet_ntop AF_INET6 roundtrip');
+    }
 }
 
 SKIP: {
