@@ -1,22 +1,13 @@
 Revision history for Socket
 
-1.94_07 CHANGES:
+1.95_001 CHANGES:
+         * Avoid newSVpvn_flags(), as it's missing on older Perls
+         * Implement getnameinfo() NIx_NOHOST and NIx_NOSERV extension flags
+
+1.95    CHANGES:
          * Implement the remaining AI_*, EAI_* and NI_* constants from
            Socket::GetAddrInfo
-         * Bugfix to tests - only test inet_ntop with AF_INET6 if it's
-           actually supported
-
-1.94_06 CHANGES:
-         * Don't use croak_xs_usage because xsubpp doesn't create one before
-           perl 5.10
-
-1.94_05 CHANGES:
-         * Don't actually need to dVAR in getaddrinfo/getnameinfo; might
-           improve portability to perl 5.8
-
-1.94_04 CHANGES:
-         * Declare configure-time dependency on ExtUtils::Constants 0.23
-
-1.94_03 CHANGES:
+         * Declare configure-time dependency on ExtUtils::Constants 0.23 for
+           when building out of core
          * Initial attempt at dual-life extraction from bleadperl
 
