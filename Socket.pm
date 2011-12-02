@@ -3,7 +3,7 @@ package Socket;
 use strict;
 
 our($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-$VERSION = "1.95";
+$VERSION = "1.95_001";
 
 =head1 NAME
 
@@ -287,7 +287,7 @@ address.
 
 =back
 
-=item getnameinfo ADDR, FLAGS
+=item getnameinfo ADDR, FLAGS, XFLAGS
 
 Given a packed socket address (such as from C<getsockname>, C<getpeername>, or
 returned by C<getaddrinfo> in a C<addr> field), returns the hostname and
@@ -302,6 +302,10 @@ followed by the hostname and service name.
 The error value will be a dualvar; comparable to the C<EI_*> error constants,
 or printable as a human-readable error message string. The host and service
 names will be plain strings.
+
+XFLAGS may be a bitmask of C<NIx_NOHOST> or C<NIx_NOSERV>, which cause
+C<undef> to be returned for the host or service name rather than performing a
+lookup of that name.
 
 =back
 
@@ -557,6 +561,9 @@ require XSLoader;
 	       NI_NUMERICHOST
 	       NI_NUMERICSERV
 
+	       NIx_NOHOST
+	       NIx_NOSERV
+
 	       TCP_KEEPALIVE
 	       TCP_MAXRT
 	       TCP_MAXSEG
@@ -584,6 +591,11 @@ BEGIN {
     sub CR   () {"\015"}
     sub LF   () {"\012"}
     sub CRLF () {"\015\012"}
+
+    # These are not gni() constants; they're extensions for the perl API
+    # The definitions in Socket.pm and Socket.xs must match
+    sub NIx_NOHOST() {1 << 0}
+    sub NIx_NOSERV() {1 << 1}
 }
 
 *CR   = \CR();
@@ -827,7 +839,7 @@ sub fake_getaddrinfo
 
 sub fake_getnameinfo
 {
-    my ( $addr, $flags ) = @_;
+    my ( $addr, $flags, $xflags ) = @_;
 
     my ( $port, $inetaddr );
     eval { ( $port, $inetaddr ) = Socket::unpack_sockaddr_in( $addr ) }
@@ -848,8 +860,13 @@ sub fake_getnameinfo
 
     $flags == 0 or return fake_makeerr( EAI_BADFLAGS() );
 
+    $xflags ||= 0;
+
     my $node;
-    if( $flag_numerichost ) {
+    if( $xflags & NIx_NOHOST ) {
+	$node = undef;
+    }
+    elsif( $flag_numerichost ) {
 	$node = Socket::inet_ntoa( $inetaddr );
     }
     else {
@@ -866,7 +883,10 @@ sub fake_getnameinfo
     }
 
     my $service;
-    if( $flag_numericserv ) {
+    if( $xflags & NIx_NOSERV ) {
+	$service = undef;
+    }
+    elsif( $flag_numericserv ) {
 	$service = "$port";
     }
     else {
