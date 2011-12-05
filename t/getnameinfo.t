@@ -2,10 +2,7 @@ use strict;
 use warnings;
 use Test::More tests => 14;
 
-use Socket qw(
-   AF_INET NI_NUMERICHOST NI_NUMERICSERV NIx_NOHOST NIx_NOSERV
-   getnameinfo pack_sockaddr_in inet_aton
-);
+use Socket qw(:addrinfo AF_INET pack_sockaddr_in inet_aton);
 
 my ( $err, $host, $service );
 

@@ -2,241 +2,397 @@ package Socket;
 
 use strict;
 
-our($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-$VERSION = "1.95_001";
+our $VERSION = "1.95_002";
 
 =head1 NAME
 
-Socket, sockaddr_in, sockaddr_un, inet_aton, inet_ntoa, inet_pton, inet_ntop - load the C socket.h defines and structure manipulators 
+C<Socket> - networking constants and structure manipulators
 
 =head1 SYNOPSIS
 
-    use Socket;
+This is a low-level module used by, among other things, the L<IO::Socket>
+family of modules. The following examples demonstrate some low-level uses but
+a practical program would likely use the higher-level API provided by
+C<IO::Socket> or similar instead.
 
-    $proto = getprotobyname('udp');
-    socket(Socket_Handle, PF_INET, SOCK_DGRAM, $proto);
-    $iaddr = gethostbyname('hishost.com');
-    $port = getservbyname('time', 'udp');
-    $sin = sockaddr_in($port, $iaddr);
-    send(Socket_Handle, 0, 0, $sin);
+ use Socket qw(PF_INET SOCK_STREAM pack_sockaddr_in inet_aton);
 
-    $proto = getprotobyname('tcp');
-    socket(Socket_Handle, PF_INET, SOCK_STREAM, $proto);
-    $port = getservbyname('smtp', 'tcp');
-    $sin = sockaddr_in($port,inet_aton("127.1"));
-    $sin = sockaddr_in(7,inet_aton("localhost"));
-    $sin = sockaddr_in(7,INADDR_LOOPBACK);
-    connect(Socket_Handle,$sin);
+ socket(my $socket, PF_INET, SOCK_STREAM, 0)
+     or die "socket: $!";
 
-    ($port, $iaddr) = sockaddr_in(getpeername(Socket_Handle));
-    $peer_host = gethostbyaddr($iaddr, AF_INET);
-    $peer_addr = inet_ntoa($iaddr);
+ my $port = getservbyname "echo", "tcp";
+ connect($socket, pack_sockaddr_in($port, inet_aton("localhost")))
+     or die "connect: $!";
 
-    $proto = getprotobyname('tcp');
-    socket(Socket_Handle, PF_UNIX, SOCK_STREAM, $proto);
-    unlink('/var/run/usock');
-    $sun = sockaddr_un('/var/run/usock');
-    connect(Socket_Handle,$sun);
+ print $socket "Hello, world!\n";
+ print <$socket>;
+
+Z<>
+
+ use Socket qw(
+     PF_INET6 SOCK_DGRAM 
+     IPPROTO_IPV6 IPV6_V6ONLY
+     AF_INET6 pack_sockaddr_in6 inet_pton
+     unpack_sockaddr_in6 inet_ntop
+ );
+
+ socket(my $socket, PF_INET6, SOCK_DGRAM, 0)
+     or die "socket: $!";
+ setsockopt($socket, IPPROTO_IPV6, IPV6_V6ONLY, 1)
+     or die "setsockopt: $!";
+ bind($socket, pack_sockaddr_in6(12345, inet_pton(AF_INET6, "::1")))
+     or die "bind: $!";
+ 
+ while(my $sender = recv($socket, my $packet, 8192)) {
+     my $sin6 = (unpack_sockaddr_in6 $sender)[1];
+     print "Received packet from ", inet_ntop(AF_INET6, $sin6), "\n";
+ }
+
+Z<>
+
+ use Socket qw(PF_UNIX SOCK_STREAM pack_sockaddr_un unpack_sockaddr_un);
+
+ socket(my $socket, PF_UNIX, SOCK_STREAM, 0)
+     or die "socket: $!";
+ bind($socket, pack_sockaddr_un("/var/run/usock"))
+     or die "bind: $!";
+ listen($socket, 5)
+     or die "listen: $!";
+
+ while(my $conn = accept($socket)) {
+     my $peer = getpeername($conn);
+     print "Accepted a connection from ",
+         unpack_sockaddr_un($peer), "\n";
+ }
 
 =head1 DESCRIPTION
 
-This module is just a translation of the C F<socket.h> file.
-Unlike the old mechanism of requiring a translated F<socket.ph>
-file, this uses the B<h2xs> program (see the Perl source distribution)
-and your native C compiler.  This means that it has a 
-far more likely chance of getting the numbers right.  This includes
-all of the commonly used pound-defines like AF_INET, SOCK_STREAM, etc.
+This module provides a variety of constants, structure manipulators and other
+functions related to socket-based networking. The values and functions
+provided are useful when used in conjunction with Perl core functions such as
+socket(), setsockopt() and bind(). It also provides several other support
+functions, mostly for dealing with conversions of network addresses between
+human-readable and native binary forms, and for hostname resolver operations.
 
-Also, some common socket "newline" constants are provided: the
-constants C<CR>, C<LF>, and C<CRLF>, as well as C<$CR>, C<$LF>, and
-C<$CRLF>, which map to C<\015>, C<\012>, and C<\015\012>.  If you do
-not want to use the literal characters in your programs, then use
-the constants provided here.  They are not exported by default, but can
-be imported individually, and with the C<:crlf> export tag:
+Some constants and functions are exported by default by this module; but for
+backward-compatibility any recently-added symbols are not exported by default
+and must be requested explicitly. When an import list is provided to the
+C<use Socket> line, the default exports are not automatically imported. It is
+therefore best practice to always to explicitly list all the symbols required.
 
-    use Socket qw(:DEFAULT :crlf);
+Also, some common socket "newline" constants are provided: the constants
+C<CR>, C<LF>, and C<CRLF>, as well as C<$CR>, C<$LF>, and C<$CRLF>, which map
+to C<\015>, C<\012>, and C<\015\012>. If you do not want to use the literal
+characters in your programs, then use the constants provided here. They are
+not exported by default, but can be imported individually, and with the
+C<:crlf> export tag:
 
-In addition, some structure manipulation functions are available:
+ use Socket qw(:DEFAULT :crlf);
+
+ $sock->print( "GET / HTTP/1.0$CRLF" );
+
+The entire getaddrinfo() subsystem can be exported using the tag C<:addrinfo>;
+this exports the getaddrinfo() and getnameinfo() functions, and all the
+C<AI_*>, C<NI_*>, C<NIx_*> and C<EAI_*> constants.
+
+=cut
+
+=head1 CONSTANTS
+
+The following constants are exported by default. In each of the following
+groups, there may be many more constants provided than just the ones given
+as examples in the section heading. If the heading ends C<...> then this means
+there are likely more; the exact constants provided will depend on the OS and
+headers found at compile-time.
+
+=cut
 
 =over 4
 
-=item inet_aton HOSTNAME
+=item PF_INET, PF_INET6, PF_UNIX, ...
 
-Takes a string giving the name of a host, and translates that to an
-opaque string (if programming in C, struct in_addr). Takes arguments
-of both the 'rtfm.mit.edu' type and '18.181.0.24'. If the host name
-cannot be resolved, returns undef.  For multi-homed hosts (hosts with
-more than one address), the first address found is returned.
+Protocol family constants to use as the first argument to socket() or the
+value of the C<SO_FAMILY> socket option.
 
-For portability do not assume that the result of inet_aton() is 32
-bits wide, in other words, that it would contain only the IPv4 address
-in network order.
+=item AF_INET, AF_INET6, AF_UNIX, ...
 
-=item inet_ntoa IP_ADDRESS
+Address family constants used by the socket address structures, to pass to
+such functions as inet_pton() or getaddrinfo(), or are returned by such
+functions as sockaddr_family().
 
-Takes a string (an opaque string as returned by inet_aton(),
-or a v-string representing the four octets of the IPv4 address in
-network order) and translates it into a string of the form 'd.d.d.d'
-where the 'd's are numbers less than 256 (the normal human-readable
-four dotted number notation for Internet addresses).
+=item SOCK_STREAM, SOCK_DGRAM, SOCK_RAW, ...
 
-=item INADDR_ANY
+Socket type constants to use as the second argument to socket(), or the value
+of the C<SO_TYPE> socket option.
 
-Note: does not return a number, but a packed string.
+=item SOL_SOCKET
 
-Returns the 4-byte wildcard ip address which specifies any
-of the hosts ip addresses.  (A particular machine can have
-more than one ip address, each address corresponding to
-a particular network interface. This wildcard address
-allows you to bind to all of them simultaneously.)
-Normally equivalent to inet_aton('0.0.0.0').
+Socket option level constant for setsockopt() and getsockopt().
 
-=item INADDR_BROADCAST
+=item SO_ACCEPTCONN, SO_BROADCAST, SO_ERROR, ...
 
-Note: does not return a number, but a packed string.
+Socket option name constants for setsockopt() and getsockopt() at the
+C<SOL_SOCKET> level.
 
-Returns the 4-byte 'this-lan' ip broadcast address.
-This can be useful for some protocols to solicit information
-from all servers on the same LAN cable.
-Normally equivalent to inet_aton('255.255.255.255').
+=item IP_OPTIONS, IP_TOS, IP_TTL, ...
 
-=item INADDR_LOOPBACK
+Socket option name constants for IPv4 socket options at the C<IPPROTO_IP>
+level.
 
-Note - does not return a number.
+=item MSG_BCAST, MSG_OOB, MSG_TRUNC, ...
 
-Returns the 4-byte loopback address.  Normally equivalent
-to inet_aton('localhost').
+Message flag constants for send() and recv().
 
-=item INADDR_NONE
+=item SHUT_RD, SHUT_RDWR, SHUT_WR
 
-Note - does not return a number.
+Direction constants for shutdown().
 
-Returns the 4-byte 'invalid' ip address.  Normally equivalent
-to inet_aton('255.255.255.255').
+=item INADDR_ANY, INADDR_BROADCAST, INADDR_LOOPBACK, INADDR_NONE
 
-=item IN6ADDR_ANY
+Constants giving the special C<AF_INET> addresses for wildcard, broadcast,
+local loopback, and invalid addresses.
 
-Returns the 16-byte wildcard IPv6 address. Normally equivalent
-to inet_pton(AF_INET6, "::")
+Normally equivalent to inet_aton('0.0.0.0'), inet_aton('255.255.255.255'),
+inet_aton('localhost') and inet_aton('255.255.255.255') respectively.
 
-=item IN6ADDR_LOOPBACK
+=back
 
-Returns the 16-byte loopback IPv6 address. Normally equivalent
-to inet_pton(AF_INET6, "::1")
+The following constants are exported by request.
 
-=item sockaddr_family SOCKADDR
+=over 4
 
-Takes a sockaddr structure (as returned by pack_sockaddr_in(),
+=item IPPROTO_IP, IPPROTO_IPV6, IPPROTO_TCP, ...
+
+IP protocol constants to use as the third argument to socket(), the level
+argument to getsockopt() or setsockopt(), or the value of the C<SO_PROTOCOL>
+socket option.
+
+=item TCP_CORK, TCP_KEEPALIVE, TCP_NODELAY, ...
+
+Socket option name constants for TCP socket options at the C<IPPROTO_TCP>
+level.
+
+=item IN6ADDR_ANY, IN6ADDR_LOOPBACK
+
+Constants giving the special C<AF_INET6> addresses for wildcard and local
+loopback.
+
+Normally equivalent to inet_pton(AF_INET6, "::") and
+inet_pton(AF_INET6, "::1") respectively.
+
+=item IPV6_ADD_MEMBERSHIP, IPV6_MTU, IPV6_V6ONLY, ...
+
+Socket option name constants for IPv6 socket options at the C<IPPROTO_IPV6>
+level.
+
+=back
+
+=cut
+
+# Still undocumented: SCM_*, SOMAXCONN, IOV_MAX, UIO_MAXIOV
+
+=head1 STRUCTURE MANIPULATORS
+
+The following functions convert between lists of Perl values and packed binary
+strings representing structures and are exported by default.
+
+=cut
+
+=over 4
+
+=item FAMILY = sockaddr_family SOCKADDR
+
+Takes a packed socket address (as returned by pack_sockaddr_in(),
 pack_sockaddr_un() or the perl builtin functions getsockname() and
-getpeername()) and returns the address family tag.  It will match the
-constant AF_INET for a sockaddr_in and AF_UNIX for a sockaddr_un.  It
-can be used to figure out what unpacker to use for a sockaddr of
-unknown type.
+getpeername()). Returns the address family tag. This will be one of the
+C<AF_*> constants, such as C<AF_INET> for a C<sockaddr_in> addresses or
+C<AF_UNIX> for a C<sockaddr_un>. It can be used to figure out what unpack to
+use for a sockaddr of unknown type.
 
-=item sockaddr_in PORT, ADDRESS
+=item SOCKADDR = pack_sockaddr_in PORT, IP_ADDRESS
 
-=item sockaddr_in SOCKADDR_IN
+Takes two arguments, a port number and an opaque string (as returned by
+inet_aton(), or a v-string). Returns the C<sockaddr_in> structure with those
+arguments packed in and C<AF_INET> filled in. For Internet domain sockets,
+this structure is normally what you need for the arguments in bind(),
+connect(), and send().
 
-In a list context, unpacks its SOCKADDR_IN argument and returns an array
-consisting of (PORT, ADDRESS).  In a scalar context, packs its (PORT,
-ADDRESS) arguments as a SOCKADDR_IN and returns it.  If this is confusing,
-use pack_sockaddr_in() and unpack_sockaddr_in() explicitly.
+=item ( PORT, IP_ADDRESS ) = unpack_sockaddr_in SOCKADDR_IN
 
-=item pack_sockaddr_in PORT, IP_ADDRESS
+Takes a C<sockaddr_in> structure (as returned by pack_sockaddr_in(),
+getpeername() or recv()). Returns a list of two elements: the port and an
+opaque string representing the IP address (you can use inet_ntoa() to convert
+the address to the four-dotted numeric format). Will croak if the structure
+does not represent an C<AF_INET> address.
 
-Takes two arguments, a port number and an opaque string, IP_ADDRESS
-(as returned by inet_aton(), or a v-string).  Returns the sockaddr_in
-structure with those arguments packed in with AF_INET filled in.  For
-Internet domain sockets, this structure is normally what you need for
-the arguments in bind(), connect(), and send(), and is also returned
-by getpeername(), getsockname() and recv().
+=item SOCKADDR = sockaddr_in PORT, IP_ADDRESS
 
-=item unpack_sockaddr_in SOCKADDR_IN
+=item ( PORT, IP_ADDRESS ) = sockaddr_in SOCKADDR
 
-Takes a sockaddr_in structure (as returned by pack_sockaddr_in()) and
-returns an array of two elements: the port and an opaque string
-representing the IP address (you can use inet_ntoa() to convert the
-address to the four-dotted numeric format).  Will croak if the
-structure does not have AF_INET in the right place.
+A wrapper of pack_sockaddr_in() or unpack_sockaddr_in(). In list context,
+unpacks its argument and returns a list consisting of the port and IP address.
+In scalar context, packs its port and IP address arguments as a C<sockaddr_in>
+and returns it.
 
-=item sockaddr_in6 PORT, IP6_ADDRESS, [ SCOPE_ID, [ FLOWINFO ] ]
+Provided largely for legacy compatibility; it is better to use
+pack_sockaddr_in() or unpack_sockaddr_in() explicitly.
 
-=item sockaddr_in6 SOCKADDR_IN6
-
-In list context, unpacks its SOCKADDR_IN6 argument according to
-unpack_sockaddr_in6(). In scalar context, packs its arguments according to
-pack_sockaddr_in6().
-
-=item pack_sockaddr_in6 PORT, IP6_ADDRESS, [ SCOPE_ID, [ FLOWINFO ] ]
+=item SOCKADDR = pack_sockaddr_in6 PORT, IP6_ADDRESS, [ SCOPE_ID, [ FLOWINFO ] ]
 
 Takes two to four arguments, a port number, an opaque string (as returned by
 inet_pton()), optionally a scope ID number, and optionally a flow label
-number. Returns the sockaddr_in6 structure with those arguments packed in
-with AF_INET6 filled in. IPv6 equivalent of pack_sockaddr_in().
+number. Returns the C<sockaddr_in6> structure with those arguments packed in
+and C<AF_INET6> filled in. IPv6 equivalent of pack_sockaddr_in().
 
-=item unpack_sockaddr_in6 SOCKADDR_IN6
+=item ( PORT, IP6_ADDRESS, SCOPE_ID, FLOWINFO ) = unpack_sockaddr_in6 SOCKADDR_IN6
 
-Takes a sockaddr_in6 structure (as returned by pack_sockaddr_in6()) and
-returns an array of four elements: the port number, an opaque string
-representing the IPv6 address, the scope ID, and the flow label. (You can
-use inet_ntop() to convert the address to the usual string format). Will
-croak if the structure does not have AF_INET6 in the right place.
+Takes a C<sockaddr_in6> structure. Returns a list of four elements: the port
+number, an opaque string representing the IPv6 address, the scope ID, and the
+flow label. (You can use inet_ntop() to convert the address to the usual
+string format). Will croak if the structure does not represent an C<AF_INET6>
+address.
 
-=item sockaddr_un PATHNAME
+=item SOCKADDR = sockaddr_in6 PORT, IP6_ADDRESS, [ SCOPE_ID, [ FLOWINFO ] ]
 
-=item sockaddr_un SOCKADDR_UN
+=item ( PORT, IP6_ADDRESS, SCOPE_ID, FLOWINFO ) = sockaddr_in6 SOCKADDR
 
-In a list context, unpacks its SOCKADDR_UN argument and returns an array
-consisting of (PATHNAME).  In a scalar context, packs its PATHNAME
-arguments as a SOCKADDR_UN and returns it.  If this is confusing, use
-pack_sockaddr_un() and unpack_sockaddr_un() explicitly.
+A wrapper of pack_sockaddr_in6() or unpack_sockaddr_in6(). In list context,
+unpacks its argument according to unpack_sockaddr_in6(). In scalar context,
+packs its arguments according to pack_sockaddr_in6().
+
+Provided largely for legacy compatibility; it is better to use
+pack_sockaddr_in6() or unpack_sockaddr_in6() explicitly.
+
+=item SOCKADDR = pack_sockaddr_un PATH
+
+Takes one argument, a pathname. Returns the C<sockaddr_un> structure with that
+path packed in with C<AF_UNIX> filled in. For C<PF_UNIX> sockets, this
+structure is normally what you need for the arguments in bind(), connect(),
+and send().
+
+=item ( PATH ) = unpack_sockaddr_un SOCKADDR
+
+Takes a C<sockaddr_un> structure (as returned by pack_sockaddr_un(),
+getpeername() or recv()). Returns a list of one element: the pathname. Will
+croak if the structure does not represent an C<AF_UNIX> address.
+
+=item SOCKADDR = sockaddr_un PATH
+
+=item ( PATH ) = sockaddr_un SOCKADDR
+
+A wrapper of pack_sockaddr_un() or unpack_sockaddr_un(). In a list context,
+unpacks its argument and returns a list consisting of the pathname. In a
+scalar context, packs its pathname as a C<sockaddr_un> and returns it.
+
+Provided largely for legacy compatibility; it is better to use
+pack_sockaddr_un() or unpack_sockaddr_un() explicitly.
+
 These are only supported if your system has E<lt>F<sys/un.h>E<gt>.
 
-=item pack_sockaddr_un PATH
+=back
 
-Takes one argument, a pathname. Returns the sockaddr_un structure with
-that path packed in with AF_UNIX filled in. For unix domain sockets, this
-structure is normally what you need for the arguments in bind(),
-connect(), and send(), and is also returned by getpeername(),
-getsockname() and recv().
+The following pairs of functions are exported by request.
 
-=item unpack_sockaddr_un SOCKADDR_UN
+=over 4
 
-Takes a sockaddr_un structure (as returned by pack_sockaddr_un())
-and returns the pathname.  Will croak if the structure does not
-have AF_UNIX in the right place.
+=item IPV6_MREQ = pack_ipv6_mreq IP6_MULTIADDR, INTERFACE
 
-=item inet_pton ADDRESS_FAMILY, HOSTNAME
+Takes an IPv6 address and an interface number. Returns the C<ipv6_mreq>
+structure with those arguments packed in. Suitable for use with the
+C<IPV6_ADD_MEMBERSHIP> and C<IPV6_DROP_MEMBERSHIP> sockopts.
 
-Takes an address family, either AF_INET or AF_INET6, and a string giving
-the name of a host, and translates that to an opaque string
-(if programming in C, struct in_addr or struct in6_addr depending on the 
-address family passed in).  The host string may be a string hostname, such
-as 'www.perl.org', or an IP address.  If using an IP address, the type of
-IP address must be consistent with the address family passed into the function.
+=item ( IP6_MULTIADDR, INTERFACE ) = unpack_ipv6_mreq IPV6_MREQ
 
-This function is not exported by default.
+Takes an C<ipv6_mreq> structure. Returns a list of two elements; the IPv6
+address and an interface number.
 
-=item inet_ntop ADDRESS_FAMILY, IP_ADDRESS
+=back
 
-Takes an address family, either AF_INET or AF_INET6, and a string 
-(an opaque string as returned by inet_aton() or inet_pton()) and
-translates it to an IPv4 or IPv6 address string.
+=cut
 
-This function is not exported by default.
+=head1 FUNCTIONS
 
-=item getaddrinfo HOST, SERVICE, [ HINTS ]
+The following functions are exported by default.
 
-Given at least one of a hostname and a service name, returns a list of address
-structures to listen on or connect to. HOST and SERVICE should be plain
-strings (or a numerical port number for SERVICE). If present, HINTS should be
-a reference to a HASH, where the following keys are recognised:
+=cut
 
-=over 8
+=over 4
+
+=item IP_ADDRESS = inet_aton HOSTNAME
+
+Takes a string giving the name of a host, or a textual representation of an IP
+address and translates that to an packed binary address structure suitable to
+pass to pack_sockaddr_in(). If passed a hostname that cannot be resolved,
+returns C<undef>. For multi-homed hosts (hosts with more than one address),
+the first address found is returned.
+
+For portability do not assume that the result of inet_aton() is 32 bits wide,
+in other words, that it would contain only the IPv4 address in network order.
+
+This IPv4-only function is provided largely for legacy reasons. Newly-written
+code should use getaddrinfo() or inet_pton() instead for IPv6 support.
+
+=item STRING = inet_ntoa IP_ADDRESS
+
+Takes a packed binary address structure such as returned by
+unpack_sockaddr_in() (or a v-string representing the four octets of the IPv4
+address in network order) and translates it into a string of the form
+C<d.d.d.d> where the C<d>s are numbers less than 256 (the normal
+human-readable four dotted number notation for Internet addresses).
+
+This IPv4-only function is provided largely for legacy reasons. Newly-written
+code should use getnameinfo() or inet_ntop() instead for IPv6 support.
+
+=back
+
+The following functions are exported by request.
+
+=over 4
+
+=item IP_ADDRESS = inet_pton ADDRESS_FAMILY, HOSTNAME
+
+Takes an address family (such as C<AF_INET> or C<AF_INET6>) and a string
+giving the name of a host, or a textual representation of an IP address and
+translates that to an packed binary address structure.
+
+See also getaddrinfo() for a more powerful and flexible function to look up
+socket addresses given hostnames or textual addresses.
+
+=item STRING = inet_ntop ADDRESS_FAMILY, IP_ADDRESS
+
+Takes an address family and a packed binary address structure and translates
+it into a human-readable textual representation of the address; typically in
+C<d.d.d.d> form for C<AF_INET> or C<hhhh:hhhh::hhhh> form for C<AF_INET6>.
+
+See also getnameinfo() for a more powerful and flexible function to turn
+socket addresses into human-readable textual representations.
+
+=item ( ERR, RESULT ... ) = getaddrinfo HOST, SERVICE, [ HINTS ]
+
+Given both a hostname and service name, this function attempts to resolve the
+host name into a list of network addresses, and the service name into a
+protocol and port number, and then returns a list of address structures
+suitable to connect() to it.
+
+Given just a host name, this function attempts to resolve it to a list of
+network addresses, and then returns a list of address structures giving these
+addresses.
+
+Given just a service name, this function attempts to resolve it to a protocol
+and port number, and then returns a list of address structures that represent
+it suitable to bind() to. This use should be combined with the C<AI_PASSIVE>
+flag; see below.
+
+Given neither name, it generates an error.
+
+If present, HINTS should be a reference to a hash, where the following keys
+are recognised:
+
+=over 4
 
 =item flags => INT
 
-A bitfield containing C<AI_*> constants
+A bitfield containing C<AI_*> constants; see below.
 
 =item family => INT
 
@@ -253,31 +409,35 @@ Restrict to only generating addresses for this protocol
 =back
 
 The return value will be a list; the first value being an error indication,
-followed by a list of address structures (if no error occured).
+followed by a list of address structures (if no error occurred).
 
  my ( $err, @results ) = getaddrinfo( ... );
 
 The error value will be a dualvar; comparable to the C<EI_*> error constants,
-or printable as a human-readable error message string. Each value in the
-results list will be a HASH reference containing the following fields:
+or printable as a human-readable error message string. If no error occurred it
+will be zero numerically and an empty string.
 
-=over 8
+Each value in the results list will be a hash reference containing the following
+fields:
+
+=over 4
 
 =item family => INT
 
-The address family (e.g. AF_INET)
+The address family (e.g. C<AF_INET>)
 
 =item socktype => INT
 
-The socket type (e.g. SOCK_STREAM)
+The socket type (e.g. C<SOCK_STREAM>)
 
 =item protocol => INT
 
-The protocol (e.g. IPPROTO_TCP)
+The protocol (e.g. C<IPPROTO_TCP>)
 
 =item addr => STRING
 
-The address in a packed string (such as would be returned by pack_sockaddr_in)
+The address in a packed string (such as would be returned by
+pack_sockaddr_in())
 
 =item canonname => STRING
 
@@ -287,10 +447,34 @@ address.
 
 =back
 
-=item getnameinfo ADDR, FLAGS, XFLAGS
+The following flag constants are recognised in the HINTS hash. Other flag
+constants may exist as provided by the OS.
 
-Given a packed socket address (such as from C<getsockname>, C<getpeername>, or
-returned by C<getaddrinfo> in a C<addr> field), returns the hostname and
+=over 4
+
+=item AI_PASSIVE
+
+Indicates that this resolution is for a local bind() for a passive (i.e.
+listening) socket, rather than an active (i.e. connecting) socket.
+
+=item AI_CANONNAME
+
+Indicates that the caller wishes the canonical hostname (C<canonname>) field
+of the result to be filled in.
+
+=item AI_NUMERICHOST
+
+Indicates that the caller will pass a numeric address, rather than a hostname,
+and that getaddrinfo() must not perform a resolve operation on this name. This
+flag will prevent a possibly-slow network lookup operation, and instead return
+an error if a hostname is passed.
+
+=back
+
+=item ( HOSTNAME, SERVICENAME ) = getnameinfo ADDR, FLAGS, XFLAGS
+
+Given a packed socket address (such as from getsockname(), getpeername(), or
+returned by getaddrinfo() in a C<addr> field), returns the hostname and
 symbolic service name it represents. FLAGS may be a bitmask of C<NI_*>
 constants, or defaults to 0 if unspecified.
 
@@ -303,26 +487,102 @@ The error value will be a dualvar; comparable to the C<EI_*> error constants,
 or printable as a human-readable error message string. The host and service
 names will be plain strings.
 
-XFLAGS may be a bitmask of C<NIx_NOHOST> or C<NIx_NOSERV>, which cause
-C<undef> to be returned for the host or service name rather than performing a
-lookup of that name.
+The following flag constants are recognised as FLAGS. Other flag constants may
+exist as provided by the OS.
+
+=over 4
+
+=item NI_NUMERICHOST
+
+Requests that a human-readable string representation of the numeric address be
+returned directly, rather than performing a name resolve operation that may
+convert it into a hostname. This will also avoid potentially-blocking network
+IO.
+
+=item NI_NUMERICSERV
+
+Requests that the port number be returned directly as a number representation
+rather than performing a name resolve operation that may convert it into a
+service name.
+
+=item NI_NAMEREQD
+
+If a name resolve operation fails to provide a name, then this flag will cause
+getnameinfo() to indicate an error, rather than returning the numeric
+representation as a human-readable string.
+
+=item NI_DGRAM
+
+Indicates that the socket address relates to a C<SOCK_DGRAM> socket, for the
+services whose name differs between TCP and UDP protocols.
 
 =back
 
-=over 8
+The following constants may be supplied as XFLAGS.
 
-=item pack_ipv6_mreq IP6_MULTIADDR, INTERFACE
+=over 4
 
-Takes an IPv6 address and an interface number. Returns the ipv6_mreq structure
-with those arguments packed in. Suitable for use with the
-C<IPV6_ADD_MEMBERSHIP> and C<IPV6_DROP_MEMBERSHIP> sockopts.
+=item NIx_NOHOST
 
-=item unpack_ipv6_mreq IPV6_MREQ
+Indicates that the caller is not interested in the hostname of the result, so
+it does not have to be converted. C<undef> will be returned as the hostname.
 
-Takes an ipv6_mreq structure and returns a list of two elements; the IPv6
-address and an interface number.
+=item NIx_NOSERV
+
+Indicates that the caller is not interested in the service name of the result,
+so it does not have to be converted. C<undef> will be returned as the service
+name.
 
 =back
+
+=back
+
+=head2 getaddrinfo() / getnameinfo() ERROR CONSTANTS
+
+The following constants may be returned by getaddrinfo() or getnameinfo().
+Others may be provided by the OS.
+
+=over 4
+
+=item EAI_AGAIN
+
+A temporary failure occurred during name resolution. The operation may be
+successful if it is retried later.
+
+=item EAI_BADFLAGS
+
+The value of the C<flags> hint to getaddrinfo(), or the FLAGS parameter to
+getnameinfo() contains unrecognised flags.
+
+=item EAI_FAMILY
+
+The C<family> hint to getaddrinfo(), or the family of the socket address
+passed to getnameinfo() is not supported.
+
+=item EAI_NODATA
+
+The host name supplied to getaddrinfo() did not provide any usable address
+data.
+
+=item EAI_NONAME
+
+The host name supplied to getaddrinfo() does not exist, or the address
+supplied to getnameinfo() is not associated with a host name and the
+C<NI_NAMEREQD> flag was supplied.
+
+=item EAI_SERVICE
+
+The service name supplied to getaddrinfo() is not available for the socket
+type given in the HINTS.
+
+=back
+
+=head1 AUTHOR
+
+This module was originally maintained in Perl core by the Perl 5 Porters.
+
+It was extracted to dual-life on CPAN at version 1.95 by
+Paul Evans <leonerd@leonerd.org.uk>
 
 =cut
 
@@ -331,260 +591,108 @@ use warnings::register;
 
 require Exporter;
 require XSLoader;
-@ISA = qw(Exporter);
+our @ISA = qw(Exporter);
 
 # <@Nicholas> you can't change @EXPORT without breaking the implicit API
 # Please put any new constants in @EXPORT_OK!
-@EXPORT = qw(
-	inet_aton inet_ntoa
-	sockaddr_family
-	pack_sockaddr_in unpack_sockaddr_in
-	pack_sockaddr_un unpack_sockaddr_un
-	pack_sockaddr_in6 unpack_sockaddr_in6
-	sockaddr_in sockaddr_in6 sockaddr_un
-	INADDR_ANY INADDR_BROADCAST INADDR_LOOPBACK INADDR_NONE
-	AF_802
-	AF_AAL
-	AF_APPLETALK
-	AF_CCITT
-	AF_CHAOS
-	AF_CTF
-	AF_DATAKIT
-	AF_DECnet
-	AF_DLI
-	AF_ECMA
-	AF_GOSIP
-	AF_HYLINK
-	AF_IMPLINK
-	AF_INET
-	AF_INET6
-	AF_ISO
-	AF_KEY
-	AF_LAST
-	AF_LAT
-	AF_LINK
-	AF_MAX
-	AF_NBS
-	AF_NIT
-	AF_NS
-	AF_OSI
-	AF_OSINET
-	AF_PUP
-	AF_ROUTE
-	AF_SNA
-	AF_UNIX
-	AF_UNSPEC
-	AF_USER
-	AF_WAN
-	AF_X25
-	IOV_MAX
-	IP_OPTIONS
-	IP_HDRINCL
-	IP_TOS
-	IP_TTL
-	IP_RECVOPTS
-	IP_RECVRETOPTS
-	IP_RETOPTS
-	MSG_BCAST
-	MSG_BTAG
-	MSG_CTLFLAGS
-	MSG_CTLIGNORE
-	MSG_CTRUNC
-	MSG_DONTROUTE
-	MSG_DONTWAIT
-	MSG_EOF
-	MSG_EOR
-	MSG_ERRQUEUE
-	MSG_ETAG
-	MSG_FIN
-	MSG_MAXIOVLEN
-	MSG_MCAST
-	MSG_NOSIGNAL
-	MSG_OOB
-	MSG_PEEK
-	MSG_PROXY
-	MSG_RST
-	MSG_SYN
-	MSG_TRUNC
-	MSG_URG
-	MSG_WAITALL
-	MSG_WIRE
-	PF_802
-	PF_AAL
-	PF_APPLETALK
-	PF_CCITT
-	PF_CHAOS
-	PF_CTF
-	PF_DATAKIT
-	PF_DECnet
-	PF_DLI
-	PF_ECMA
-	PF_GOSIP
-	PF_HYLINK
-	PF_IMPLINK
-	PF_INET
-	PF_INET6
-	PF_ISO
-	PF_KEY
-	PF_LAST
-	PF_LAT
-	PF_LINK
-	PF_MAX
-	PF_NBS
-	PF_NIT
-	PF_NS
-	PF_OSI
-	PF_OSINET
-	PF_PUP
-	PF_ROUTE
-	PF_SNA
-	PF_UNIX
-	PF_UNSPEC
-	PF_USER
-	PF_WAN
+
+# List re-ordered to match documentation above. Try to keep the ordering
+# consistent so it's easier to see which ones are or aren't documented.
+our @EXPORT = qw(
+	PF_802 PF_AAL PF_APPLETALK PF_CCITT PF_CHAOS PF_CTF PF_DATAKIT
+	PF_DECnet PF_DLI PF_ECMA PF_GOSIP PF_HYLINK PF_IMPLINK PF_INET PF_INET6
+	PF_ISO PF_KEY PF_LAST PF_LAT PF_LINK PF_MAX PF_NBS PF_NIT PF_NS PF_OSI
+	PF_OSINET PF_PUP PF_ROUTE PF_SNA PF_UNIX PF_UNSPEC PF_USER PF_WAN
 	PF_X25
-	SCM_CONNECT
-	SCM_CREDENTIALS
-	SCM_CREDS
-	SCM_RIGHTS
-	SCM_TIMESTAMP
-	SHUT_RD
-	SHUT_RDWR
-	SHUT_WR
-	SOCK_DGRAM
-	SOCK_RAW
-	SOCK_RDM
-	SOCK_SEQPACKET
-	SOCK_STREAM
+
+	AF_802 AF_AAL AF_APPLETALK AF_CCITT AF_CHAOS AF_CTF AF_DATAKIT
+	AF_DECnet AF_DLI AF_ECMA AF_GOSIP AF_HYLINK AF_IMPLINK AF_INET AF_INET6
+	AF_ISO AF_KEY AF_LAST AF_LAT AF_LINK AF_MAX AF_NBS AF_NIT AF_NS AF_OSI
+	AF_OSINET AF_PUP AF_ROUTE AF_SNA AF_UNIX AF_UNSPEC AF_USER AF_WAN
+	AF_X25
+
+	SOCK_DGRAM SOCK_RAW SOCK_RDM SOCK_SEQPACKET SOCK_STREAM
+
 	SOL_SOCKET
+
+	SO_ACCEPTCONN SO_ATTACH_FILTER SO_BACKLOG SO_BROADCAST SO_CHAMELEON
+	SO_DEBUG SO_DETACH_FILTER SO_DGRAM_ERRIND SO_DONTLINGER SO_DONTROUTE
+	SO_ERROR SO_FAMILY SO_KEEPALIVE SO_LINGER SO_OOBINLINE SO_PASSCRED
+	SO_PASSIFNAME SO_PEERCRED SO_PROTOCOL SO_PROTOTYPE SO_RCVBUF
+	SO_RCVLOWAT SO_RCVTIMEO SO_REUSEADDR SO_REUSEPORT
+	SO_SECURITY_AUTHENTICATION SO_SECURITY_ENCRYPTION_NETWORK
+	SO_SECURITY_ENCRYPTION_TRANSPORT SO_SNDBUF SO_SNDLOWAT SO_SNDTIMEO
+	SO_STATE SO_TYPE SO_USELOOPBACK SO_XOPEN SO_XSE
+
+	IP_OPTIONS IP_HDRINCL IP_TOS IP_TTL IP_RECVOPTS IP_RECVRETOPTS
+	IP_RETOPTS
+
+	MSG_BCAST MSG_BTAG MSG_CTLFLAGS MSG_CTLIGNORE MSG_CTRUNC MSG_DONTROUTE
+	MSG_DONTWAIT MSG_EOF MSG_EOR MSG_ERRQUEUE MSG_ETAG MSG_FIN
+	MSG_MAXIOVLEN MSG_MCAST MSG_NOSIGNAL MSG_OOB MSG_PEEK MSG_PROXY MSG_RST
+	MSG_SYN MSG_TRUNC MSG_URG MSG_WAITALL MSG_WIRE
+
+	SHUT_RD SHUT_RDWR SHUT_WR
+
+	INADDR_ANY INADDR_BROADCAST INADDR_LOOPBACK INADDR_NONE
+
+	SCM_CONNECT SCM_CREDENTIALS SCM_CREDS SCM_RIGHTS SCM_TIMESTAMP
+
 	SOMAXCONN
-	SO_ACCEPTCONN
-	SO_ATTACH_FILTER
-	SO_BACKLOG
-	SO_BROADCAST
-	SO_CHAMELEON
-	SO_DEBUG
-	SO_DETACH_FILTER
-	SO_DGRAM_ERRIND
-	SO_DONTLINGER
-	SO_DONTROUTE
-	SO_ERROR
-	SO_FAMILY
-	SO_KEEPALIVE
-	SO_LINGER
-	SO_OOBINLINE
-	SO_PASSCRED
-	SO_PASSIFNAME
-	SO_PEERCRED
-	SO_PROTOCOL
-	SO_PROTOTYPE
-	SO_RCVBUF
-	SO_RCVLOWAT
-	SO_RCVTIMEO
-	SO_REUSEADDR
-	SO_REUSEPORT
-	SO_SECURITY_AUTHENTICATION
-	SO_SECURITY_ENCRYPTION_NETWORK
-	SO_SECURITY_ENCRYPTION_TRANSPORT
-	SO_SNDBUF
-	SO_SNDLOWAT
-	SO_SNDTIMEO
-	SO_STATE
-	SO_TYPE
-	SO_USELOOPBACK
-	SO_XOPEN
-	SO_XSE
+
+	IOV_MAX
 	UIO_MAXIOV
+
+	sockaddr_family
+	pack_sockaddr_in  unpack_sockaddr_in  sockaddr_in
+	pack_sockaddr_in6 unpack_sockaddr_in6 sockaddr_in6
+	pack_sockaddr_un  unpack_sockaddr_un  sockaddr_un 
+
+	inet_aton inet_ntoa
 );
 
-@EXPORT_OK = qw(CR LF CRLF $CR $LF $CRLF
+# List re-ordered to match documentation above. Try to keep the ordering
+# consistent so it's easier to see which ones are or aren't documented.
+our @EXPORT_OK = qw(
+	CR LF CRLF $CR $LF $CRLF
 
-	       inet_pton
-	       inet_ntop
+	IPPROTO_IP IPPROTO_IPV6 IPPROTO_RAW IPPROTO_ICMP IPPROTO_TCP
+	IPPROTO_UDP
 
-	       getaddrinfo
-	       getnameinfo
+	TCP_CONGESTION TCP_CORK TCP_DEFER_ACCEPT TCP_INFO TCP_KEEPALIVE
+	TCP_KEEPCNT TCP_KEEPIDLE TCP_KEEPINTVL TCP_LINGER2 TCP_MAXRT TCP_MAXSEG
+	TCP_MD5SIG TCP_NODELAY TCP_QUICKACK TCP_STDURG TCP_SYNCNT
+	TCP_WINDOW_CLAMP 
 
-	       pack_ipv6_mreq
-	       unpack_ipv6_mreq
+	IN6ADDR_ANY IN6ADDR_LOOPBACK
 
-	       IN6ADDR_ANY IN6ADDR_LOOPBACK
+	IPV6_ADD_MEMBERSHIP IPV6_DROP_MEMBERSHIP IPV6_MTU IPV6_MTU_DISCOVER
+	IPV6_MULTICAST_HOPS IPV6_MULTICAST_IF IPV6_MULTICAST_LOOP
+	IPV6_UNICAST_HOPS IPV6_V6ONLY
 
-	       AI_ADDRCONFIG
-	       AI_ALL
-	       AI_CANONIDN
-	       AI_CANONNAME
-	       AI_IDN
-	       AI_IDN_ALLOW_UNASSIGNED
-	       AI_IDN_USE_STD3_ASCII_RULES
-	       AI_NUMERICHOST
-	       AI_NUMERICSERV
-	       AI_PASSIVE
-	       AI_V4MAPPED
+	pack_ipv6_mreq unpack_ipv6_mreq
 
-	       EAI_ADDRFAMILY
-	       EAI_AGAIN
-	       EAI_BADFLAGS
-	       EAI_BADHINTS
-	       EAI_FAIL
-	       EAI_FAMILY
-	       EAI_NODATA
-	       EAI_NONAME
-	       EAI_PROTOCOL
-	       EAI_SERVICE
-	       EAI_SOCKTYPE
-	       EAI_SYSTEM
+	inet_pton inet_ntop
 
-	       IPPROTO_IP
-	       IPPROTO_IPV6
-	       IPPROTO_RAW
-	       IPPROTO_ICMP
-	       IPPROTO_TCP
-	       IPPROTO_UDP
+	getaddrinfo getnameinfo
 
-	       IPV6_ADD_MEMBERSHIP
-	       IPV6_DROP_MEMBERSHIP
-	       IPV6_MTU
-	       IPV6_MTU_DISCOVER
-	       IPV6_MULTICAST_HOPS
-	       IPV6_MULTICAST_IF
-	       IPV6_MULTICAST_LOOP
-	       IPV6_UNICAST_HOPS
-	       IPV6_V6ONLY
+	AI_ADDRCONFIG AI_ALL AI_CANONIDN AI_CANONNAME AI_IDN
+	AI_IDN_ALLOW_UNASSIGNED AI_IDN_USE_STD3_ASCII_RULES AI_NUMERICHOST
+	AI_NUMERICSERV AI_PASSIVE AI_V4MAPPED
 
-	       NI_DGRAM
-	       NI_IDN
-	       NI_IDN_ALLOW_UNASSIGNED
-	       NI_IDN_USE_STD3_ASCII_RULES
-	       NI_NAMEREQD
-	       NI_NOFQDN
-	       NI_NUMERICHOST
-	       NI_NUMERICSERV
+	NI_DGRAM NI_IDN NI_IDN_ALLOW_UNASSIGNED NI_IDN_USE_STD3_ASCII_RULES
+	NI_NAMEREQD NI_NOFQDN NI_NUMERICHOST NI_NUMERICSERV
 
-	       NIx_NOHOST
-	       NIx_NOSERV
+	NIx_NOHOST NIx_NOSERV
 
-	       TCP_KEEPALIVE
-	       TCP_MAXRT
-	       TCP_MAXSEG
-	       TCP_NODELAY
-	       TCP_STDURG
-	       TCP_CORK
-	       TCP_KEEPIDLE
-	       TCP_KEEPINTVL
-	       TCP_KEEPCNT
-	       TCP_SYNCNT
-	       TCP_LINGER2
-	       TCP_DEFER_ACCEPT
-	       TCP_WINDOW_CLAMP
-	       TCP_INFO
-	       TCP_QUICKACK
-	       TCP_CONGESTION
-	       TCP_MD5SIG);
+	EAI_ADDRFAMILY EAI_AGAIN EAI_BADFLAGS EAI_BADHINTS EAI_FAIL EAI_FAMILY
+	EAI_NODATA EAI_NONAME EAI_PROTOCOL EAI_SERVICE EAI_SOCKTYPE EAI_SYSTEM
+);
 
-%EXPORT_TAGS = (
-    crlf    => [qw(CR LF CRLF $CR $LF $CRLF)],
-    all     => [@EXPORT, @EXPORT_OK],
+our %EXPORT_TAGS = (
+    crlf     => [qw(CR LF CRLF $CR $LF $CRLF)],
+    addrinfo => [qw(getaddrinfo getnameinfo), grep m/^(?:AI|NI|NIx|EAI)_/, @EXPORT_OK],
+    all      => [@EXPORT, @EXPORT_OK],
 );
 
 BEGIN {
