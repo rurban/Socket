@@ -1,5 +1,11 @@
 Revision history for Socket
 
+1.95_002 CHANGES:
+         * Complete rewrite of module docs; list all the constants and
+           functions, updated SYNOPSIS
+         * Added convenient Exporter tag :addrinfo for all the gai/gni-related
+           symbols
+
 1.95_001 CHANGES:
          * Avoid newSVpvn_flags(), as it's missing on older Perls
          * Implement getnameinfo() NIx_NOHOST and NIx_NOSERV extension flags
