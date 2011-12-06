@@ -1,5 +1,10 @@
 Revision history for Socket
 
+1.95_003 CHANGES:
+         * Futher docs updates - rewordings, style changes, etc...
+         * Fix Socket.t to use ok() instead of is() where required - RT73039
+         * Declare OS unsupported on perl 5.10.0 or earlier than 5.8.9
+
 1.95_002 CHANGES:
          * Complete rewrite of module docs; list all the constants and
            functions, updated SYNOPSIS

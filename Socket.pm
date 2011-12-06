@@ -2,15 +2,15 @@ package Socket;
 
 use strict;
 
-our $VERSION = "1.95_002";
+our $VERSION = "1.95_003";
 
 =head1 NAME
 
-C<Socket> - networking constants and structure manipulators
+C<Socket> - networking constants and support functions
 
 =head1 SYNOPSIS
 
-This is a low-level module used by, among other things, the L<IO::Socket>
+C<Socket> a low-level module used by, among other things, the L<IO::Socket>
 family of modules. The following examples demonstrate some low-level uses but
 a practical program would likely use the higher-level API provided by
 C<IO::Socket> or similar instead.
@@ -27,43 +27,7 @@ C<IO::Socket> or similar instead.
  print $socket "Hello, world!\n";
  print <$socket>;
 
-Z<>
-
- use Socket qw(
-     PF_INET6 SOCK_DGRAM 
-     IPPROTO_IPV6 IPV6_V6ONLY
-     AF_INET6 pack_sockaddr_in6 inet_pton
-     unpack_sockaddr_in6 inet_ntop
- );
-
- socket(my $socket, PF_INET6, SOCK_DGRAM, 0)
-     or die "socket: $!";
- setsockopt($socket, IPPROTO_IPV6, IPV6_V6ONLY, 1)
-     or die "setsockopt: $!";
- bind($socket, pack_sockaddr_in6(12345, inet_pton(AF_INET6, "::1")))
-     or die "bind: $!";
- 
- while(my $sender = recv($socket, my $packet, 8192)) {
-     my $sin6 = (unpack_sockaddr_in6 $sender)[1];
-     print "Received packet from ", inet_ntop(AF_INET6, $sin6), "\n";
- }
-
-Z<>
-
- use Socket qw(PF_UNIX SOCK_STREAM pack_sockaddr_un unpack_sockaddr_un);
-
- socket(my $socket, PF_UNIX, SOCK_STREAM, 0)
-     or die "socket: $!";
- bind($socket, pack_sockaddr_un("/var/run/usock"))
-     or die "bind: $!";
- listen($socket, 5)
-     or die "listen: $!";
-
- while(my $conn = accept($socket)) {
-     my $peer = getpeername($conn);
-     print "Accepted a connection from ",
-         unpack_sockaddr_un($peer), "\n";
- }
+See also the L</EXAMPLES> section.
 
 =head1 DESCRIPTION
 
@@ -107,47 +71,45 @@ headers found at compile-time.
 
 =cut
 
-=over 4
-
-=item PF_INET, PF_INET6, PF_UNIX, ...
+=head2 PF_INET, PF_INET6, PF_UNIX, ...
 
 Protocol family constants to use as the first argument to socket() or the
 value of the C<SO_FAMILY> socket option.
 
-=item AF_INET, AF_INET6, AF_UNIX, ...
+=head2 AF_INET, AF_INET6, AF_UNIX, ...
 
 Address family constants used by the socket address structures, to pass to
 such functions as inet_pton() or getaddrinfo(), or are returned by such
 functions as sockaddr_family().
 
-=item SOCK_STREAM, SOCK_DGRAM, SOCK_RAW, ...
+=head2 SOCK_STREAM, SOCK_DGRAM, SOCK_RAW, ...
 
 Socket type constants to use as the second argument to socket(), or the value
 of the C<SO_TYPE> socket option.
 
-=item SOL_SOCKET
+=head2 SOL_SOCKET
 
 Socket option level constant for setsockopt() and getsockopt().
 
-=item SO_ACCEPTCONN, SO_BROADCAST, SO_ERROR, ...
+=head2 SO_ACCEPTCONN, SO_BROADCAST, SO_ERROR, ...
 
 Socket option name constants for setsockopt() and getsockopt() at the
 C<SOL_SOCKET> level.
 
-=item IP_OPTIONS, IP_TOS, IP_TTL, ...
+=head2 IP_OPTIONS, IP_TOS, IP_TTL, ...
 
 Socket option name constants for IPv4 socket options at the C<IPPROTO_IP>
 level.
 
-=item MSG_BCAST, MSG_OOB, MSG_TRUNC, ...
+=head2 MSG_BCAST, MSG_OOB, MSG_TRUNC, ...
 
 Message flag constants for send() and recv().
 
-=item SHUT_RD, SHUT_RDWR, SHUT_WR
+=head2 SHUT_RD, SHUT_RDWR, SHUT_WR
 
 Direction constants for shutdown().
 
-=item INADDR_ANY, INADDR_BROADCAST, INADDR_LOOPBACK, INADDR_NONE
+=head2 INADDR_ANY, INADDR_BROADCAST, INADDR_LOOPBACK, INADDR_NONE
 
 Constants giving the special C<AF_INET> addresses for wildcard, broadcast,
 local loopback, and invalid addresses.
@@ -155,24 +117,20 @@ local loopback, and invalid addresses.
 Normally equivalent to inet_aton('0.0.0.0'), inet_aton('255.255.255.255'),
 inet_aton('localhost') and inet_aton('255.255.255.255') respectively.
 
-=back
-
 The following constants are exported by request.
 
-=over 4
-
-=item IPPROTO_IP, IPPROTO_IPV6, IPPROTO_TCP, ...
+=head2 IPPROTO_IP, IPPROTO_IPV6, IPPROTO_TCP, ...
 
 IP protocol constants to use as the third argument to socket(), the level
 argument to getsockopt() or setsockopt(), or the value of the C<SO_PROTOCOL>
 socket option.
 
-=item TCP_CORK, TCP_KEEPALIVE, TCP_NODELAY, ...
+=head2 TCP_CORK, TCP_KEEPALIVE, TCP_NODELAY, ...
 
 Socket option name constants for TCP socket options at the C<IPPROTO_TCP>
 level.
 
-=item IN6ADDR_ANY, IN6ADDR_LOOPBACK
+=head2 IN6ADDR_ANY, IN6ADDR_LOOPBACK
 
 Constants giving the special C<AF_INET6> addresses for wildcard and local
 loopback.
@@ -180,12 +138,10 @@ loopback.
 Normally equivalent to inet_pton(AF_INET6, "::") and
 inet_pton(AF_INET6, "::1") respectively.
 
-=item IPV6_ADD_MEMBERSHIP, IPV6_MTU, IPV6_V6ONLY, ...
+=head2 IPV6_ADD_MEMBERSHIP, IPV6_MTU, IPV6_V6ONLY, ...
 
 Socket option name constants for IPv6 socket options at the C<IPPROTO_IPV6>
 level.
-
-=back
 
 =cut
 
@@ -198,9 +154,7 @@ strings representing structures and are exported by default.
 
 =cut
 
-=over 4
-
-=item FAMILY = sockaddr_family SOCKADDR
+=head2 $family = sockaddr_family $sockaddr
 
 Takes a packed socket address (as returned by pack_sockaddr_in(),
 pack_sockaddr_un() or the perl builtin functions getsockname() and
@@ -209,7 +163,7 @@ C<AF_*> constants, such as C<AF_INET> for a C<sockaddr_in> addresses or
 C<AF_UNIX> for a C<sockaddr_un>. It can be used to figure out what unpack to
 use for a sockaddr of unknown type.
 
-=item SOCKADDR = pack_sockaddr_in PORT, IP_ADDRESS
+=head2 $sockaddr = pack_sockaddr_in $port, $ip_address
 
 Takes two arguments, a port number and an opaque string (as returned by
 inet_aton(), or a v-string). Returns the C<sockaddr_in> structure with those
@@ -217,7 +171,7 @@ arguments packed in and C<AF_INET> filled in. For Internet domain sockets,
 this structure is normally what you need for the arguments in bind(),
 connect(), and send().
 
-=item ( PORT, IP_ADDRESS ) = unpack_sockaddr_in SOCKADDR_IN
+=head2 ($port, $ip_address) = unpack_sockaddr_in $sockaddr
 
 Takes a C<sockaddr_in> structure (as returned by pack_sockaddr_in(),
 getpeername() or recv()). Returns a list of two elements: the port and an
@@ -225,9 +179,9 @@ opaque string representing the IP address (you can use inet_ntoa() to convert
 the address to the four-dotted numeric format). Will croak if the structure
 does not represent an C<AF_INET> address.
 
-=item SOCKADDR = sockaddr_in PORT, IP_ADDRESS
+=head2 $sockaddr = sockaddr_in $port, $ip_address
 
-=item ( PORT, IP_ADDRESS ) = sockaddr_in SOCKADDR
+=head2 ($port, $ip_address) = sockaddr_in $sockaddr
 
 A wrapper of pack_sockaddr_in() or unpack_sockaddr_in(). In list context,
 unpacks its argument and returns a list consisting of the port and IP address.
@@ -237,14 +191,14 @@ and returns it.
 Provided largely for legacy compatibility; it is better to use
 pack_sockaddr_in() or unpack_sockaddr_in() explicitly.
 
-=item SOCKADDR = pack_sockaddr_in6 PORT, IP6_ADDRESS, [ SCOPE_ID, [ FLOWINFO ] ]
+=head2 $sockaddr = pack_sockaddr_in6 $port, $ip6_address, [$scope_id, [$flowinfo]]
 
 Takes two to four arguments, a port number, an opaque string (as returned by
 inet_pton()), optionally a scope ID number, and optionally a flow label
 number. Returns the C<sockaddr_in6> structure with those arguments packed in
 and C<AF_INET6> filled in. IPv6 equivalent of pack_sockaddr_in().
 
-=item ( PORT, IP6_ADDRESS, SCOPE_ID, FLOWINFO ) = unpack_sockaddr_in6 SOCKADDR_IN6
+=head2 ($port, $ip6_address, $scope_id, $flowinfo) = unpack_sockaddr_in6 $sockaddr
 
 Takes a C<sockaddr_in6> structure. Returns a list of four elements: the port
 number, an opaque string representing the IPv6 address, the scope ID, and the
@@ -252,9 +206,9 @@ flow label. (You can use inet_ntop() to convert the address to the usual
 string format). Will croak if the structure does not represent an C<AF_INET6>
 address.
 
-=item SOCKADDR = sockaddr_in6 PORT, IP6_ADDRESS, [ SCOPE_ID, [ FLOWINFO ] ]
+=head2 $sockaddr = sockaddr_in6 $port, $ip6_address, [$scope_id, [$flowinfo]]
 
-=item ( PORT, IP6_ADDRESS, SCOPE_ID, FLOWINFO ) = sockaddr_in6 SOCKADDR
+=head2 ($port, $ip6_address, $scope_id, $flowinfo) = sockaddr_in6 $sockaddr
 
 A wrapper of pack_sockaddr_in6() or unpack_sockaddr_in6(). In list context,
 unpacks its argument according to unpack_sockaddr_in6(). In scalar context,
@@ -263,22 +217,22 @@ packs its arguments according to pack_sockaddr_in6().
 Provided largely for legacy compatibility; it is better to use
 pack_sockaddr_in6() or unpack_sockaddr_in6() explicitly.
 
-=item SOCKADDR = pack_sockaddr_un PATH
+=head2 $sockaddr = pack_sockaddr_un $path
 
 Takes one argument, a pathname. Returns the C<sockaddr_un> structure with that
 path packed in with C<AF_UNIX> filled in. For C<PF_UNIX> sockets, this
 structure is normally what you need for the arguments in bind(), connect(),
 and send().
 
-=item ( PATH ) = unpack_sockaddr_un SOCKADDR
+=head2 ($path) = unpack_sockaddr_un $sockaddr
 
 Takes a C<sockaddr_un> structure (as returned by pack_sockaddr_un(),
 getpeername() or recv()). Returns a list of one element: the pathname. Will
 croak if the structure does not represent an C<AF_UNIX> address.
 
-=item SOCKADDR = sockaddr_un PATH
+=head2 $sockaddr = sockaddr_un $path
 
-=item ( PATH ) = sockaddr_un SOCKADDR
+=head2 ($path) = sockaddr_un $sockaddr
 
 A wrapper of pack_sockaddr_un() or unpack_sockaddr_un(). In a list context,
 unpacks its argument and returns a list consisting of the pathname. In a
@@ -289,24 +243,18 @@ pack_sockaddr_un() or unpack_sockaddr_un() explicitly.
 
 These are only supported if your system has E<lt>F<sys/un.h>E<gt>.
 
-=back
-
 The following pairs of functions are exported by request.
 
-=over 4
-
-=item IPV6_MREQ = pack_ipv6_mreq IP6_MULTIADDR, INTERFACE
+=head2 $ipv6_mreq = pack_ipv6_mreq $ip6_address, $ifindex
 
 Takes an IPv6 address and an interface number. Returns the C<ipv6_mreq>
 structure with those arguments packed in. Suitable for use with the
 C<IPV6_ADD_MEMBERSHIP> and C<IPV6_DROP_MEMBERSHIP> sockopts.
 
-=item ( IP6_MULTIADDR, INTERFACE ) = unpack_ipv6_mreq IPV6_MREQ
+=head2 ($ip6_address, $ifindex) = unpack_ipv6_mreq $ipv6_mreq
 
 Takes an C<ipv6_mreq> structure. Returns a list of two elements; the IPv6
 address and an interface number.
-
-=back
 
 =cut
 
@@ -316,9 +264,7 @@ The following functions are exported by default.
 
 =cut
 
-=over 4
-
-=item IP_ADDRESS = inet_aton HOSTNAME
+=head2 $ip_address = inet_aton $string
 
 Takes a string giving the name of a host, or a textual representation of an IP
 address and translates that to an packed binary address structure suitable to
@@ -332,7 +278,7 @@ in other words, that it would contain only the IPv4 address in network order.
 This IPv4-only function is provided largely for legacy reasons. Newly-written
 code should use getaddrinfo() or inet_pton() instead for IPv6 support.
 
-=item STRING = inet_ntoa IP_ADDRESS
+=head2 $string = inet_ntoa $ip_address
 
 Takes a packed binary address structure such as returned by
 unpack_sockaddr_in() (or a v-string representing the four octets of the IPv4
@@ -343,13 +289,9 @@ human-readable four dotted number notation for Internet addresses).
 This IPv4-only function is provided largely for legacy reasons. Newly-written
 code should use getnameinfo() or inet_ntop() instead for IPv6 support.
 
-=back
-
 The following functions are exported by request.
 
-=over 4
-
-=item IP_ADDRESS = inet_pton ADDRESS_FAMILY, HOSTNAME
+=head2 $address = inet_pton $family, $string
 
 Takes an address family (such as C<AF_INET> or C<AF_INET6>) and a string
 giving the name of a host, or a textual representation of an IP address and
@@ -358,7 +300,7 @@ translates that to an packed binary address structure.
 See also getaddrinfo() for a more powerful and flexible function to look up
 socket addresses given hostnames or textual addresses.
 
-=item STRING = inet_ntop ADDRESS_FAMILY, IP_ADDRESS
+=head2 $string = inet_ntop $family, $address
 
 Takes an address family and a packed binary address structure and translates
 it into a human-readable textual representation of the address; typically in
@@ -367,7 +309,7 @@ C<d.d.d.d> form for C<AF_INET> or C<hhhh:hhhh::hhhh> form for C<AF_INET6>.
 See also getnameinfo() for a more powerful and flexible function to turn
 socket addresses into human-readable textual representations.
 
-=item ( ERR, RESULT ... ) = getaddrinfo HOST, SERVICE, [ HINTS ]
+=head2 ($err, @result) = getaddrinfo $host, $service, [$hints]
 
 Given both a hostname and service name, this function attempts to resolve the
 host name into a list of network addresses, and the service name into a
@@ -385,7 +327,7 @@ flag; see below.
 
 Given neither name, it generates an error.
 
-If present, HINTS should be a reference to a hash, where the following keys
+If present, $hints should be a reference to a hash, where the following keys
 are recognised:
 
 =over 4
@@ -410,8 +352,6 @@ Restrict to only generating addresses for this protocol
 
 The return value will be a list; the first value being an error indication,
 followed by a list of address structures (if no error occurred).
-
- my ( $err, @results ) = getaddrinfo( ... );
 
 The error value will be a dualvar; comparable to the C<EI_*> error constants,
 or printable as a human-readable error message string. If no error occurred it
@@ -447,7 +387,7 @@ address.
 
 =back
 
-The following flag constants are recognised in the HINTS hash. Other flag
+The following flag constants are recognised in the $hints hash. Other flag
 constants may exist as provided by the OS.
 
 =over 4
@@ -471,23 +411,21 @@ an error if a hostname is passed.
 
 =back
 
-=item ( HOSTNAME, SERVICENAME ) = getnameinfo ADDR, FLAGS, XFLAGS
+=head2 ($err, $hostname, $servicename) = getnameinfo $sockaddr, [$flags, [$xflags]]
 
 Given a packed socket address (such as from getsockname(), getpeername(), or
 returned by getaddrinfo() in a C<addr> field), returns the hostname and
-symbolic service name it represents. FLAGS may be a bitmask of C<NI_*>
+symbolic service name it represents. $flags may be a bitmask of C<NI_*>
 constants, or defaults to 0 if unspecified.
 
 The return value will be a list; the first value being an error condition,
 followed by the hostname and service name.
 
- my ( $err, $host, $service ) = getnameinfo( ... );
-
 The error value will be a dualvar; comparable to the C<EI_*> error constants,
 or printable as a human-readable error message string. The host and service
 names will be plain strings.
 
-The following flag constants are recognised as FLAGS. Other flag constants may
+The following flag constants are recognised as $flags. Other flag constants may
 exist as provided by the OS.
 
 =over 4
@@ -518,7 +456,7 @@ services whose name differs between TCP and UDP protocols.
 
 =back
 
-The following constants may be supplied as XFLAGS.
+The following constants may be supplied as $xflags.
 
 =over 4
 
@@ -535,9 +473,7 @@ name.
 
 =back
 
-=back
-
-=head2 getaddrinfo() / getnameinfo() ERROR CONSTANTS
+=head1 getaddrinfo() / getnameinfo() ERROR CONSTANTS
 
 The following constants may be returned by getaddrinfo() or getnameinfo().
 Others may be provided by the OS.
@@ -551,7 +487,7 @@ successful if it is retried later.
 
 =item EAI_BADFLAGS
 
-The value of the C<flags> hint to getaddrinfo(), or the FLAGS parameter to
+The value of the C<flags> hint to getaddrinfo(), or the $flags parameter to
 getnameinfo() contains unrecognised flags.
 
 =item EAI_FAMILY
@@ -573,9 +509,117 @@ C<NI_NAMEREQD> flag was supplied.
 =item EAI_SERVICE
 
 The service name supplied to getaddrinfo() is not available for the socket
-type given in the HINTS.
+type given in the $hints.
 
 =back
+
+=cut
+
+=head1 EXAMPLES
+
+=head2 Lookup for connect()
+
+The getaddrinfo() function converts a hostname and a service name into a list
+of structures, each containing a potential way to connect() to the named
+service on the named host.
+
+ use IO::Socket;
+ use Socket qw(SOCK_STREAM getaddrinfo);
+
+ my %hints = (socktype => SOCK_STREAM);
+ my ($err, @res) = getaddrinfo("localhost", "echo", \%hints);
+ die "Cannot getaddrinfo - $err" if $err;
+
+ my $sock;
+
+ foreach my $ai (@res) {
+     my $candidate = IO::Socket->new();
+
+     $candidate->socket($ai->{family}, $ai->{socktype}, $ai->{protocol})
+         or next;
+
+     $candidate->connect($ai->{addr})
+         or next;
+
+     $sock = $candidate;
+     last;
+ }
+
+ die "Cannot connect to localhost:echo" unless $sock;
+
+ $sock->print("Hello, world!\n");
+ print <$sock>;
+
+Because a list of potential candidates is returned, the C<while> loop tries
+each in turn until it it finds one that succeeds both the socket() and
+connect() calls.
+
+This function performs the work of the legacy functions gethostbyname(),
+getservbyname(), inet_aton() and pack_sockaddr_in().
+
+In practice this logic is better performed by L<IO::Socket::IP>.
+
+=head2 Making a human-readable string out of an address
+
+The getnameinfo() function converts a socket address, such as returned by
+getsockname() or getpeername(), into a pair of human-readable strings
+representing the address and service name.
+
+ use IO::Socket::IP;
+ use Socket qw(getnameinfo);
+
+ my $server = IO::Socket::IP->new(LocalPort => 12345, Listen => 1) or
+     die "Cannot listen - $@";
+
+ my $socket = $server->accept or die "accept: $!";
+
+ my ($err, $hostname, $servicename) = getnameinfo($socket->peername);
+ die "Cannot getnameinfo - $err" if $err;
+
+ print "The peer is connected from $hostname\n";
+
+Since in this example only the hostname was used, the redundant conversion of
+the port number into a service name may be omitted by passing the
+C<NIx_NOSERV> flag.
+
+ use Socket qw(getnameinfo NIx_NOSERV);
+
+ my ($err, $hostname) = getnameinfo($socket->peername, 0, NIx_NOSERV);
+
+This function performs the work of the legacy functions unpack_sockaddr_in(),
+inet_ntoa(), gethostbyaddr() and getservbyport().
+
+In practice this logic is better performed by L<IO::Socket::IP>.
+
+=head2 Resolving hostnames into IP addresses
+
+To turn a hostname into a human-readable plain IP address use getaddrinfo()
+to turn the hostname into a list of socket structures, then getnameinfo() on
+each one to make it a readable IP address again.
+
+ use Socket qw(:addrinfo SOCK_RAW);
+
+ my ($err, @res) = getaddrinfo($hostname, "", {socktype => SOCK_RAW});
+ die "Cannot getaddrinfo - $err" if $err;
+
+ while( my $ai = shift @res ) {
+     my ($err, $ipaddr) = getnameinfo($ai->{addr}, NI_NUMERICHOST, NIx_NOSERV);
+     die "Cannot getnameinfo - $err" if $err;
+
+     print "$ipaddr\n";
+ }
+
+The C<socktype> hint to getaddrinfo() filters the results to only include one
+socket type and protocol. Without this most OSes return three combinations,
+for C<SOCK_STREAM>, C<SOCK_DGRAM> and C<SOCK_RAW>, resulting in triplicate
+output of addresses. The C<NI_NUMERICHOST> flag to getnameinfo() causes it to
+return a string-formatted plain IP address, rather than reverse resolving it
+back into a hostname.
+
+This combination performs the work of the legacy functions gethostbyname()
+and inet_ntoa().
+
+=cut
 
 =head1 AUTHOR
 

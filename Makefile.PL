@@ -2,6 +2,12 @@ use ExtUtils::MakeMaker;
 use ExtUtils::Constant 0.23 'WriteConstants';
 use Config;
 
+# ExtUtils::Constant breaks on 5.10.0 because it uses newSVpvn_flags. This
+# function was added at 5.10.1, and is also present in 5.8.9
+unless( $] >= 5.010010 or $] == 5.008009 ) {
+    die "OS unsupported - perl lacks newSVpvn_flags\n";
+}
+
 my @DEFINES;
 unless( $ENV{PERL_CORE} ) {
     # Building standalone, not as core.
