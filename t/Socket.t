@@ -58,7 +58,7 @@ SKIP: {
 	    arm(0);
 	}
 
-	is(($read == 0 || $buff eq "hello"), "PF_INET echo localhost reply");
+	ok(($read == 0 || $buff eq "hello"), "PF_INET echo localhost reply");
     }
 }
 
@@ -97,7 +97,7 @@ SKIP: {
 	    arm(0);
 	}
 
-	is(($read == 0 || $buff eq "olleh"), "PF_INET echo INADDR_LOOPBACK reply");
+	ok(($read == 0 || $buff eq "olleh"), "PF_INET echo INADDR_LOOPBACK reply");
     }
 }
 
