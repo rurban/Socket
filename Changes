@@ -1,5 +1,9 @@
 Revision history for Socket
 
+1.95_004 CHANGES:
+         * More docs updates - example using socket options
+         * Fix constant generation code in Makefile.PL for 5.10.0 / pre-5.8.9
+
 1.95_003 CHANGES:
          * Futher docs updates - rewordings, style changes, etc...
          * Fix Socket.t to use ok() instead of is() where required - RT73039

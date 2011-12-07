@@ -2,7 +2,7 @@ package Socket;
 
 use strict;
 
-our $VERSION = "1.95_003";
+our $VERSION = '1.95_004';
 
 =head1 NAME
 
@@ -53,7 +53,7 @@ C<:crlf> export tag:
 
  use Socket qw(:DEFAULT :crlf);
 
- $sock->print( "GET / HTTP/1.0$CRLF" );
+ $sock->print("GET / HTTP/1.0$CRLF");
 
 The entire getaddrinfo() subsystem can be exported using the tag C<:addrinfo>;
 this exports the getaddrinfo() and getnameinfo() functions, and all the
@@ -63,11 +63,10 @@ C<AI_*>, C<NI_*>, C<NIx_*> and C<EAI_*> constants.
 
 =head1 CONSTANTS
 
-The following constants are exported by default. In each of the following
-groups, there may be many more constants provided than just the ones given
-as examples in the section heading. If the heading ends C<...> then this means
-there are likely more; the exact constants provided will depend on the OS and
-headers found at compile-time.
+In each of the following groups, there may be many more constants provided
+than just the ones given as examples in the section heading. If the heading
+ends C<...> then this means there are likely more; the exact constants
+provided will depend on the OS and headers found at compile-time.
 
 =cut
 
@@ -117,8 +116,6 @@ local loopback, and invalid addresses.
 Normally equivalent to inet_aton('0.0.0.0'), inet_aton('255.255.255.255'),
 inet_aton('localhost') and inet_aton('255.255.255.255') respectively.
 
-The following constants are exported by request.
-
 =head2 IPPROTO_IP, IPPROTO_IPV6, IPPROTO_TCP, ...
 
 IP protocol constants to use as the third argument to socket(), the level
@@ -150,7 +147,7 @@ level.
 =head1 STRUCTURE MANIPULATORS
 
 The following functions convert between lists of Perl values and packed binary
-strings representing structures and are exported by default.
+strings representing structures.
 
 =cut
 
@@ -243,8 +240,6 @@ pack_sockaddr_un() or unpack_sockaddr_un() explicitly.
 
 These are only supported if your system has E<lt>F<sys/un.h>E<gt>.
 
-The following pairs of functions are exported by request.
-
 =head2 $ipv6_mreq = pack_ipv6_mreq $ip6_address, $ifindex
 
 Takes an IPv6 address and an interface number. Returns the C<ipv6_mreq>
@@ -259,8 +254,6 @@ address and an interface number.
 =cut
 
 =head1 FUNCTIONS
-
-The following functions are exported by default.
 
 =cut
 
@@ -288,8 +281,6 @@ human-readable four dotted number notation for Internet addresses).
 
 This IPv4-only function is provided largely for legacy reasons. Newly-written
 code should use getnameinfo() or inet_ntop() instead for IPv6 support.
-
-The following functions are exported by request.
 
 =head2 $address = inet_pton $family, $string
 
@@ -618,6 +609,29 @@ back into a hostname.
 
 This combination performs the work of the legacy functions gethostbyname()
 and inet_ntoa().
+
+=head2 Accessing socket options
+
+The many C<SO_*> and other constants provide the socket option names for
+getsockopt() and setsockopt().
+
+ use IO::Socket::INET;
+ use Socket qw(SOL_SOCKET SO_RCVBUF IPPROTO_IP IP_TTL);
+
+ my $socket = IO::Socket::INET->new(LocalPort => 0, Proto => 'udp')
+     or die "Cannot create socket: $@";
+
+ $socket->setsockopt(SOL_SOCKET, SO_RCVBUF, 64*1024) or
+     die "setsockopt: $!";
+
+ print "Receive buffer is ", $socket->getsockopt(SOL_SOCKET, SO_RCVBUF),
+     " bytes\n";
+
+ print "IP TTL is ", $socket->getsockopt(IPPROTO_IP, IP_TTL), "\n";
+
+As a convenience, L<IO::Socket>'s setsockopt() method will convert a number
+into a packed byte buffer, and getsockopt() will unpack a byte buffer of the
+correct size back into a number.
 
 =cut
 

@@ -2,12 +2,6 @@ use ExtUtils::MakeMaker;
 use ExtUtils::Constant 0.23 'WriteConstants';
 use Config;
 
-# ExtUtils::Constant breaks on 5.10.0 because it uses newSVpvn_flags. This
-# function was added at 5.10.1, and is also present in 5.8.9
-unless( $] >= 5.010010 or $] == 5.008009 ) {
-    die "OS unsupported - perl lacks newSVpvn_flags\n";
-}
-
 my @DEFINES;
 unless( $ENV{PERL_CORE} ) {
     # Building standalone, not as core.
@@ -161,10 +155,22 @@ push @names,
            "#endif\n"]}
 foreach qw (MSG_CTRUNC MSG_DONTROUTE MSG_OOB MSG_PEEK MSG_PROXY SCM_RIGHTS);
 
+sub newSVpvn_temp {
+	my ($varname) = @_;
+	if($] >= 5.010001 or $] == 5.008009) {
+		# Perls 5.10.1 and above, and 5.8.9 have newSVpvn_flags()
+		return "newSVpvn_flags((char *)&$varname, sizeof($varname), SVs_TEMP)";
+	}
+	else {
+		# Older perls will have to settle for sv_2mortal(newSVpvn())
+		return "sv_2mortal(newSVpvn((char *)&$varname, sizeof($varname)))";
+	}
+}
+
 push @names, 
 {name => $_, type => "SV",
  pre=>"struct in_addr ip_address; ip_address.s_addr = htonl($_);",
- value => "newSVpvn_flags((char *)&ip_address,sizeof(ip_address), SVs_TEMP)",}
+ value => newSVpvn_temp("ip_address"),}
          foreach qw(INADDR_ANY INADDR_LOOPBACK INADDR_NONE INADDR_BROADCAST);
 
 push @names,
@@ -172,7 +178,7 @@ push @names,
  macro=>["#ifdef ${_}_INIT\n",
          "#endif\n"],
  pre=>"struct in6_addr ip6_address = ${_}_INIT;",
- value => "newSVpvn_flags((char *)&ip6_address,sizeof(ip6_address), SVs_TEMP)",}
+ value => newSVpvn_temp("ip6_address"),}
 	 foreach qw(IN6ADDR_ANY IN6ADDR_LOOPBACK);
 
 WriteConstants(
