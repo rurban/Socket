@@ -159,7 +159,7 @@ SKIP: {
 }
 
 SKIP: {
-    skip "No inet_ntop", 3 unless $Config{d_inetntop} && $Config{d_inetaton};
+    skip "No inet_ntop", 3 unless defined eval { inet_pton(AF_INET, "10.20.30.40") };
 
     is(inet_ntop(AF_INET, inet_pton(AF_INET, "10.20.30.40")), "10.20.30.40", 'inet_pton->inet_ntop AF_INET roundtrip');
     is(inet_ntop(AF_INET, inet_aton("10.20.30.40")), "10.20.30.40", 'inet_aton->inet_ntop AF_INET roundtrip');

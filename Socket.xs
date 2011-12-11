@@ -75,6 +75,24 @@ NETINET_DEFINE_CONTEXT
 # define croak_sv(sv)	croak(SvPV_nolen(sv))
 #endif
 
+/* perl < 5.8.9 or == 5.10.0 lacks newSVpvn_flags */
+#if PERL_VERSION < 8
+# define NEED_newSVpvn_flags
+#elif PERL_VERSION == 8 && PERL_SUBVERSION < 9
+# define NEED_newSVpvn_flags
+#elif PERL_VERSION == 10 && PERL_SUBVERSION == 0
+# define NEED_newSVpvn_flags
+#endif
+
+#ifdef NEED_newSVpvn_flags
+static SV *newSVpvn_flags(pTHX_ const char *s, STRLEN len, U32 flags)
+{
+  SV *sv = newSVpvn(s, len);
+  SvFLAGS(sv) |= (flags & SVf_UTF8);
+  return (flags & SVs_TEMP) ? sv_2mortal(sv) : sv;
+}
+#endif
+
 #ifndef HAS_INET_ATON
 
 /*
