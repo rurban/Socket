@@ -1,12 +1,12 @@
 --- #YAML:1.0
 name:               Socket
-version:            1.96
+version:            1.97
 abstract:           ~
 author:  []
 license:            unknown
 distribution_type:  module
 configure_requires:
-    ExtUtils::CChecker:  0
+    ExtUtils::CBuilder:  0
     ExtUtils::Constant:  0.23
 build_requires:
     ExtUtils::MakeMaker:  0

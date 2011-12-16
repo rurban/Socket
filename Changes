@@ -1,5 +1,13 @@
 Revision history for Socket
 
+1.97    CHANGES:
+         * Rewritten Makefile.PL configure-time logic to use only core's
+           ExtUtils::CBuilder rather than CPAN's ExtUtils::CChecker
+         * Fix implementation of synthesized newSVpvn_flags() to also work on
+           threaded 5.10.0
+         * Set INSTALLDIRS=perl on perl before 5.11; required as it's
+           replacing a core module
+
 1.96    CHANGES:
          * Fix Socket.t to use ok() instead of is() where required - RT73039
          * Complete rewrite of module docs; list all the constants and
