@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Socket
-version:            1.97
+version:            1.97_001
 abstract:           ~
 author:  []
 license:            unknown
@@ -10,7 +10,8 @@ configure_requires:
     ExtUtils::Constant:  0.23
 build_requires:
     ExtUtils::MakeMaker:  0
-requires:  {}
+requires:
+    perl:  5.006001
 no_index:
     directory:
         - t
