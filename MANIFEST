@@ -12,4 +12,5 @@ t/getnameinfo.t
 t/ipv6_mreq.t
 t/Socket.t
 t/socketpair.t
+typemap
 META.yml                                 Module meta-data (added by MakeMaker)
