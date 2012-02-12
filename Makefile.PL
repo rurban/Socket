@@ -92,9 +92,21 @@ check_for(
 );
 
 check_for(
+    confkey => "d_sockaddr_in6", # invented - check with core later
+    define  => "HAS_SOCKADDR_IN6",
+    main    => "struct sockaddr_in6 sin6; sin6.sin6_family = AF_INET6;"
+);
+
+check_for(
     confkey => "d_sin6_scope_id",
     define  => "HAS_SIN6_SCOPE_ID",
     main    => "struct sockaddr_in6 sin6; sin6.sin6_scope_id = 0;"
+);
+
+check_for(
+    confkey => "d_ipv6_mreq", # invented - check with core later
+    define  => "HAS_IPV6_MREQ",
+    main    => "struct ipv6_mreq mreq; mreq.ipv6mr_interface = 0;"
 );
 
 my %makefile_args;

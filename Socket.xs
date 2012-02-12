@@ -804,7 +804,7 @@ pack_sockaddr_in6(port, sin6_addr, scope_id=0, flowinfo=0)
 	unsigned long	flowinfo
 	CODE:
 	{
-#ifdef AF_INET6
+#ifdef HAS_SOCKADDR_IN6
 	struct sockaddr_in6 sin6;
 	char * addrbytes;
 	STRLEN addrlen;
@@ -840,7 +840,7 @@ unpack_sockaddr_in6(sin6_sv)
 	SV *	sin6_sv
 	PPCODE:
 	{
-#ifdef AF_INET6
+#ifdef HAS_SOCKADDR_IN6
 	STRLEN addrlen;
 	struct sockaddr_in6 sin6;
 	char * addrbytes = SvPVbyte(sin6_sv, addrlen);
@@ -947,7 +947,7 @@ pack_ipv6_mreq(addr, interface)
 	unsigned int	interface
 	CODE:
 	{
-#ifdef AF_INET6
+#ifdef HAS_IPV6_MREQ
 	struct ipv6_mreq mreq;
 	char * addrbytes;
 	STRLEN addrlen;
@@ -971,7 +971,7 @@ unpack_ipv6_mreq(mreq_sv)
 	SV * mreq_sv
 	PPCODE:
 	{
-#ifdef AF_INET6
+#ifdef HAS_IPV6_MREQ
 	struct ipv6_mreq mreq;
 	STRLEN mreqlen;
 	char * mreqbytes = SvPVbyte(mreq_sv, mreqlen);
