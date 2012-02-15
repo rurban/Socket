@@ -1,10 +1,8 @@
 Revision history for Socket
 
-1.97_002 CHANGES:
+1.98    CHANGES:
          * Detect presence of sockaddr_in6 and ipv6_mreq; conditionally build
            pack/unpack functions on this
-
-1.97_001 CHANGES:
          * Back-compatibility improvements for older perls, back as far as
            5.6.1 (thanks Zefram)
          * Fix for picky compilers or platforms on which size_t doesn't
