@@ -879,7 +879,12 @@ inet_ntop(af, ip_address_sv)
 	struct in_addr addr;
 	char str[INET_ADDRSTRLEN];
 #endif
-	char *ip_address = SvPV(ip_address_sv, addrlen);
+	char *ip_address;
+
+	if (DO_UTF8(ip_address_sv) && !sv_utf8_downgrade(ip_address_sv, 1))
+		croak("Wide character in %s", "Socket::inet_ntop");
+
+	ip_address = SvPV(ip_address_sv, addrlen);
 
 	struct_size = sizeof(addr);
 
@@ -912,17 +917,23 @@ inet_pton(af, host)
 	CODE:
 #ifdef HAS_INETPTON
 	int ok;
+	int addrlen = 0;
 #ifdef AF_INET6
 	struct in6_addr ip_address;
 #else
 	struct in_addr ip_address;
 #endif
 
-	if (af != AF_INET
+	switch(af) {
+	  case AF_INET:
+	    addrlen = 4;
+	    break;
 #ifdef AF_INET6
-	    && af != AF_INET6
+	  case AF_INET6:
+	    addrlen = 16;
+	    break;
 #endif
-	   ) {
+	  default:
 		croak("Bad address family for %s, got %d, should be"
 #ifdef AF_INET6
 		      " either AF_INET or AF_INET6",
@@ -935,7 +946,7 @@ inet_pton(af, host)
 
 	ST(0) = sv_newmortal();
 	if (ok) {
-		sv_setpvn( ST(0), (char *)&ip_address, sizeof(ip_address) );
+		sv_setpvn( ST(0), (char *)&ip_address, addrlen);
 	}
 #else
 	ST(0) = (SV*)not_here("inet_pton");
