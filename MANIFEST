@@ -10,6 +10,7 @@ Socket.xs
 t/getaddrinfo.t
 t/getnameinfo.t
 t/ipv6_mreq.t
+t/sockaddr.t
 t/Socket.t
 t/socketpair.t
 typemap
