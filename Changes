@@ -1,6 +1,7 @@
 Revision history for Socket
 
-1.98_001 CHANGES:
+2012/02/21
+1.99    CHANGES:
          * Better implementation of inet_pton() that sets correct size (RT 75074)
          * Added SO_DOMAIN
          * More robust unit tests of address-mangling functions
