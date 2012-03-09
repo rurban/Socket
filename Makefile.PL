@@ -116,17 +116,20 @@ my %makefile_args;
 $makefile_args{INSTALLDIRS} = "perl" if $] < 5.012;
 
 WriteMakefile(
-    NAME	 => 'Socket',
-    VERSION_FROM => 'Socket.pm',
+    NAME	  => 'Socket',
+    VERSION_FROM  => 'Socket.pm',
+    # ABSTRACT_FROM gets confused by C<Socket>
+    ABSTRACT      => 'networking constants and support functions',
    ($Config{libs} =~ /(-lsocks\S*)/ ? (LIBS => [ "$1" ] ) : ()),
-    XSPROTOARG   => '-noprototypes', 		# XXX remove later?
-    realclean => {FILES=> 'const-c.inc const-xs.inc'},
-    DEFINE       => join( " ", map { "-D$_" } @DEFINES ),
+    XSPROTOARG    => '-noprototypes', 		# XXX remove later?
+    realclean     => {FILES=> 'const-c.inc const-xs.inc'},
+    DEFINE        => join( " ", map { "-D$_" } @DEFINES ),
     CONFIGURE_REQUIRES => {
 	'ExtUtils::CBuilder' => 0,
 	'ExtUtils::Constant' => '0.23',
     },
     MIN_PERL_VERSION => '5.006001',
+    LICENSE       => 'perl',
     %makefile_args,
 );
 my @names = (

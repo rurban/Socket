@@ -1,5 +1,11 @@
 Revision history for Socket
 
+2012/03/10
+2.000   CHANGES:
+         * Apply (modified) patch from rurban to fix memory overflow bug with
+           sockaddr_un() - RT75623
+         * Increase to three-digit version suffix in new major version
+
 2012/02/21
 1.99    CHANGES:
          * Better implementation of inet_pton() that sets correct size (RT 75074)
