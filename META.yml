@@ -1,9 +1,9 @@
 --- #YAML:1.0
 name:               Socket
-version:            1.99
-abstract:           ~
+version:            2.000
+abstract:           networking constants and support functions
 author:  []
-license:            unknown
+license:            perl
 distribution_type:  module
 configure_requires:
     ExtUtils::CBuilder:  0
