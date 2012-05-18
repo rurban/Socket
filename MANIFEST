@@ -9,6 +9,7 @@ Socket.pm
 Socket.xs
 t/getaddrinfo.t
 t/getnameinfo.t
+t/ip_mreq.t
 t/ipv6_mreq.t
 t/sockaddr.t
 t/Socket.t
