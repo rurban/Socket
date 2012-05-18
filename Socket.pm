@@ -3,7 +3,7 @@ package Socket;
 use strict;
 { use 5.006001; }
 
-our $VERSION = '2.001';
+our $VERSION = '2.001_001';
 
 =head1 NAME
 
@@ -240,6 +240,18 @@ Provided largely for legacy compatibility; it is better to use
 pack_sockaddr_un() or unpack_sockaddr_un() explicitly.
 
 These are only supported if your system has E<lt>F<sys/un.h>E<gt>.
+
+=head2 $ip_mreq = pack_ip_mreq $multiaddr, $interface
+
+Takes an IPv4 multicast address and optionally an interface address (or
+C<INADDR_ANY>). Returns the C<ip_mreq> structure with those arguments packed
+in. Suitable for use with the C<IP_ADD_MEMBERSHIP> and C<IP_DROP_MEMBERSHIP>
+sockopts.
+
+=head2 ($multiaddr, $interface) = unpack_ip_mreq $ip_mreq
+
+Takes an C<ip_mreq> structure. Returns a list of two elements; the IPv4
+multicast address and interface address.
 
 =head2 $ipv6_mreq = pack_ipv6_mreq $ip6_address, $ifindex
 
@@ -715,6 +727,9 @@ our @EXPORT = qw(
 our @EXPORT_OK = qw(
 	CR LF CRLF $CR $LF $CRLF
 
+	IP_ADD_MEMBERSHIP IP_DROP_MEMBERSHIP IP_MULTICAST_IF
+	IP_MULTICAST_LOOP IP_MULTICAST_TTL
+
 	IPPROTO_IP IPPROTO_IPV6 IPPROTO_RAW IPPROTO_ICMP IPPROTO_TCP
 	IPPROTO_UDP
 
@@ -728,6 +743,8 @@ our @EXPORT_OK = qw(
 	IPV6_ADD_MEMBERSHIP IPV6_DROP_MEMBERSHIP IPV6_MTU IPV6_MTU_DISCOVER
 	IPV6_MULTICAST_HOPS IPV6_MULTICAST_IF IPV6_MULTICAST_LOOP
 	IPV6_UNICAST_HOPS IPV6_V6ONLY
+
+	pack_ip_mreq unpack_ip_mreq
 
 	pack_ipv6_mreq unpack_ipv6_mreq
 

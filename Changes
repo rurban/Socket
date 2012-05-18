@@ -1,5 +1,10 @@
 Revision history for Socket
 
+2012/05/18
+2.001_001 CHANGES:
+         * Added sockopt constants and structure handling functions for IPv4
+           multicast
+
 2012/03/27
 2.001   CHANGES:
          * Apply (modified) patch from ppisar@redhat.com to fix memory
