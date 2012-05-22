@@ -3,7 +3,7 @@ package Socket;
 use strict;
 { use 5.006001; }
 
-our $VERSION = '2.001_001';
+our $VERSION = '2.001_002';
 
 =head1 NAME
 
@@ -253,13 +253,13 @@ sockopts.
 Takes an C<ip_mreq> structure. Returns a list of two elements; the IPv4
 multicast address and interface address.
 
-=head2 $ipv6_mreq = pack_ipv6_mreq $ip6_address, $ifindex
+=head2 $ipv6_mreq = pack_ipv6_mreq $multiaddr6, $ifindex
 
-Takes an IPv6 address and an interface number. Returns the C<ipv6_mreq>
-structure with those arguments packed in. Suitable for use with the
-C<IPV6_ADD_MEMBERSHIP> and C<IPV6_DROP_MEMBERSHIP> sockopts.
+Takes an IPv6 multicast address and an interface number. Returns the
+C<ipv6_mreq> structure with those arguments packed in. Suitable for use with
+the C<IPV6_ADD_MEMBERSHIP> and C<IPV6_DROP_MEMBERSHIP> sockopts.
 
-=head2 ($ip6_address, $ifindex) = unpack_ipv6_mreq $ipv6_mreq
+=head2 ($multiaddr6, $ifindex) = unpack_ipv6_mreq $ipv6_mreq
 
 Takes an C<ipv6_mreq> structure. Returns a list of two elements; the IPv6
 address and an interface number.

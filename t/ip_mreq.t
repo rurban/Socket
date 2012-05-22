@@ -19,9 +19,11 @@ if( !defined $packed ) {
     die $@;
 }
 
-plan tests => 2;
+plan tests => 3;
 
 my @unpacked = unpack_ip_mreq $packed;
 
 is( $unpacked[0], "\xe0\0\0\1", 'unpack_ip_mreq multiaddr' );
 is( $unpacked[1], INADDR_ANY,   'unpack_ip_mreq interface' );
+
+is( (unpack_ip_mreq pack_ip_mreq "\xe0\0\0\1")[1], INADDR_ANY, 'pack_ip_mreq interface defaults to INADDR_ANY' );
