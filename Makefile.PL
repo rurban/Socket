@@ -34,6 +34,9 @@ sub check_for
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#ifdef WIN32
+# include <ws2tcpip.h>
+#endif
 int main(int argc, char *argv[])
   {
     (void)argc;
@@ -101,6 +104,13 @@ check_for(
     confkey => "d_sin6_scope_id",
     define  => "HAS_SIN6_SCOPE_ID",
     main    => "struct sockaddr_in6 sin6; sin6.sin6_scope_id = 0;"
+);
+
+# TODO: Needs adding to perl5 core before importing dual-life again
+check_for(
+    confkey => "d_ip_mreq",
+    define  => "HAS_IP_MREQ",
+    main    => "struct ip_mreq mreq; mreq.imr_multiaddr.s_addr = INADDR_ANY;"
 );
 
 check_for(

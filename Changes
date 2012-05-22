@@ -1,5 +1,11 @@
 Revision history for Socket
 
+2012/05/22
+2.001_002 BUGFIXES:
+         * Perhaps improve  struct ip_mreq  support on MSWin32
+         * Make pack_ip_mreq's second argument optional as documentation says
+           it is
+
 2012/05/18
 2.001_001 CHANGES:
          * Added sockopt constants and structure handling functions for IPv4
