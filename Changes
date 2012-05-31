@@ -1,5 +1,10 @@
 Revision history for Socket
 
+2012/05/31
+2.001_003 BUGFIXES:
+         * Further improvements to  ip_mreq  support on MSWin32 (thanks to
+           Christian Walde)
+
 2012/05/22
 2.001_002 BUGFIXES:
          * Perhaps improve  struct ip_mreq  support on MSWin32

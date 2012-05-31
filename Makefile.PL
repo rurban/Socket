@@ -30,12 +30,14 @@ sub check_for
 	open( my $file_source_fh, ">", $file_source ) or die "Cannot write $file_source - $!";
 	print $file_source_fh <<"EOF";
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #ifdef WIN32
 # include <ws2tcpip.h>
+# include <winsock.h>
+#else
+# include <sys/socket.h>
+# include <netdb.h>
+# include <netinet/in.h>
+# include <arpa/inet.h>
 #endif
 int main(int argc, char *argv[])
   {
