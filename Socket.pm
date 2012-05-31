@@ -3,7 +3,7 @@ package Socket;
 use strict;
 { use 5.006001; }
 
-our $VERSION = '2.001_002';
+our $VERSION = '2.001_003';
 
 =head1 NAME
 
