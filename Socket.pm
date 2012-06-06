@@ -3,7 +3,7 @@ package Socket;
 use strict;
 { use 5.006001; }
 
-our $VERSION = '2.001_003';
+our $VERSION = '2.002';
 
 =head1 NAME
 
@@ -86,6 +86,13 @@ functions as sockaddr_family().
 
 Socket type constants to use as the second argument to socket(), or the value
 of the C<SO_TYPE> socket option.
+
+=head2 SOCK_NONBLOCK. SOCK_CLOEXEC
+
+Linux-specific shortcuts to specify the C<O_NONBLOCK> and C<FD_CLOEXEC> flags
+during a C<socket(2)> call.
+
+ socket( my $sockh, PF_INET, SOCK_DGRAM|SOCK_NONBLOCK, 0 )
 
 =head2 SOL_SOCKET
 
@@ -726,6 +733,8 @@ our @EXPORT = qw(
 # consistent so it's easier to see which ones are or aren't documented.
 our @EXPORT_OK = qw(
 	CR LF CRLF $CR $LF $CRLF
+
+	SOCK_NONBLOCK SOCK_CLOEXEC
 
 	IP_ADD_MEMBERSHIP IP_DROP_MEMBERSHIP IP_MULTICAST_IF
 	IP_MULTICAST_LOOP IP_MULTICAST_TTL
