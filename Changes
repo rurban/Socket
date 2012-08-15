@@ -1,6 +1,11 @@
 Revision history for Socket
 
 2012/08/15
+2.004   BUGFIXES:
+         * Put skip() arguments the right way around in t/ip_mreq.t (RT78986)
+
+2012/08/15
+ ** Do not use; see 2.004 **
 2.003   CHANGES:
          * Added IPV6_JOIN_GROUP and IPV6_LEAVE_GROUP
          * Added constants and functions required for IP multicast source
