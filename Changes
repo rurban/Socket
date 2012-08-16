@@ -1,5 +1,12 @@
 Revision history for Socket
 
+2012/08/16
+2.005   CHANGES:
+         * Have unpack_sockaddr_in{,6} return just the IP address in scalar
+           context
+         * Guard against incorrect length scalars being passed in to inet_ntop
+           (RT78890)
+
 2012/08/15
 2.004   BUGFIXES:
          * Put skip() arguments the right way around in t/ip_mreq.t (RT78986)

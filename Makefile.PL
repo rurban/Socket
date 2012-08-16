@@ -116,6 +116,12 @@ check_for(
 );
 
 check_for(
+    confkey => "d_ip_mreq_source",
+    define  => "HAS_IP_MREQ_SOURCE",
+    main    => "struct ip_mreq_source mreq; mreq.imr_multiaddr.s_addr = INADDR_ANY;"
+);
+
+check_for(
     confkey => "d_ipv6_mreq",
     define  => "HAS_IPV6_MREQ",
     main    => "struct ipv6_mreq mreq; mreq.ipv6mr_interface = 0;"
