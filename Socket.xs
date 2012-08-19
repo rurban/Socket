@@ -179,6 +179,9 @@ static void *my_hv_common_key_len(pTHX_ HV *hv, const char *key, I32 kl,
 #ifndef mPUSHp
 # define mPUSHp(p,l) sv_setpvn_mg(PUSHs(sv_newmortal()), (p), (l))
 #endif /* !mPUSHp */
+#ifndef mPUSHs
+# define mPUSHs(s) PUSHs(sv_2mortal(s))
+#endif /* !mPUSHs */
 
 #ifndef CvCONST_on
 # undef newCONSTSUB
