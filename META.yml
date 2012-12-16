@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Socket
-version:            2.006
+version:            2.007
 abstract:           networking constants and support functions
 author:  []
 license:            perl
