@@ -13,6 +13,7 @@ my $seq = 0;
 sub check_for
 {
     my %args = @_;
+    return if $ENV{PERL_CORE};
     return if defined $Config{$args{confkey}};
 
     require ExtUtils::CBuilder;
