@@ -1,5 +1,10 @@
 Revision history for Socket
 
+2013/01/18
+2.009   CHANGES:
+         * Fix building in core by skipping check_for() as it doesn't work
+           there (RT82760)
+
 2012/12/27
 2.008   CHANGES:
          * Fix uninitialised memory read (RT82119)
