@@ -1,5 +1,12 @@
 Revision history for Socket
 
+2013/06/24
+2.010   CHANGES:
+         * Wrap some IPTOS_* constants, which may come from <netinet/ip.h>
+         * Probe for and optionally include <netinet/ip.h>
+         * Defeat C compilers' attempts to optimise away configure-time probes
+           for functions that are never called
+
 2013/01/18
 2.009   CHANGES:
          * Fix building in core by skipping check_for() as it doesn't work
