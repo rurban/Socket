@@ -1,5 +1,11 @@
 Revision history for Socket
 
+2013/07/28
+2.011   CHANGES:
+         * Handle FreeBSD (or other platforms) returning shorter AF_UNIX
+           sockaddr structures due to embedded sun_len (RT86613)
+           (thanks Maxime Soulé; MAXS)
+
 2013/06/24
 2.010   CHANGES:
          * Wrap some IPTOS_* constants, which may come from <netinet/ip.h>
