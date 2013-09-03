@@ -1,5 +1,10 @@
 Revision history for Socket
 
+2.012   2013/09/03 13:20:09
+        [CHANGES]
+         * <ws2tcpip.h> is not needed on WinCE (RT87389)
+         * "#undef interface" to avoid issues from Windows' <ole2.h> (RT87389)
+
 2013/07/28
 2.011   CHANGES:
          * Handle FreeBSD (or other platforms) returning shorter AF_UNIX
