@@ -1,5 +1,12 @@
 Revision history for Socket
 
+2.013   2031/10/28 00:49:43
+        [BUGFIXES]
+         * Unit-test bugfixes for VMS (RT89766):
+            + Need to pass protocol => IPPROTO_TCP to avoid SCTP as well
+            + Perform AI_NUMERICHOST test against non-"localhost"
+            + May have to set NI_NUMERICSERV flag if it fails without
+
 2.012   2013/09/03 13:20:09
         [CHANGES]
          * <ws2tcpip.h> is not needed on WinCE (RT87389)
