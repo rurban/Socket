@@ -1,11 +1,20 @@
 Revision history for Socket
 
-2.013   2031/10/28 00:49:43
+2.014   2014/06/01 00:09:13
+        [BUGFIXES]
+         * Make sure to (UV)-cast arguments sprintf'ed with UVf
+         * Use STRUCT_OFFSET() instead of plain C99 offsetof() (RT96036)
+         * Fix the regexp used to filter for numeric IP addresses in
+           fake_getaddrinfo() (RT95758)
+         * Protect against getprotobyname() not being available (RT90217)
+
+2.013   2013/10/28 00:49:43
         [BUGFIXES]
          * Unit-test bugfixes for VMS (RT89766):
             + Need to pass protocol => IPPROTO_TCP to avoid SCTP as well
             + Perform AI_NUMERICHOST test against non-"localhost"
             + May have to set NI_NUMERICSERV flag if it fails without
+           (thanks Craig A. Berry)
 
 2.012   2013/09/03 13:20:09
         [CHANGES]
