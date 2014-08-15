@@ -1,5 +1,16 @@
 Revision history for Socket
 
+2.015   2014/08/15 23:27:07
+        [BUGFIXES]
+         * Test multiple possibnle portnum->name lookups in case /etc/services
+           lacks one (RT96874)
+         * Stronger kill in unit-test for cygwin (RT97773)
+         * Don't try to assert the result of getnameinfo() to match
+           gethostbyaddr() or getservbyport() (RT77248)
+         * Ensure that 'socktype' hint is always passed to getaddrinfo during
+           unit-testing (RT96274)
+         * Fix regexp borrowed from Regexp::Common::net (RT96274)
+
 2.014   2014/06/01 00:09:13
         [BUGFIXES]
          * Make sure to (UV)-cast arguments sprintf'ed with UVf

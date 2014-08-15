@@ -20,4 +20,4 @@ no_index:
     - inc
 requires:
   perl: '5.006001'
-version: '2.014'
+version: '2.015'
