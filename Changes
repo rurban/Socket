@@ -1,5 +1,13 @@
 Revision history for Socket
 
+2.016   2014/10/08 21:53:10
+        [BUGFIXES]
+         * Wrap configure tests in a {} block in case of C99-deficient
+           compilers (RT99363)
+         * #include <stddef.h> so that NULL definitely exists (RT98248)
+         * Need to pass NI_NUMERICSERV during unit tests for some OSes not to
+           error (VMS) (RT98217)
+
 2.015   2014/08/15 23:27:07
         [BUGFIXES]
          * Test multiple possibnle portnum->name lookups in case /etc/services
