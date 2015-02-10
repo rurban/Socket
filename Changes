@@ -1,5 +1,15 @@
 Revision history for Socket
 
+2.017   2015/02/10 12:05:14
+        [CHANGES]
+         * Added some more SO_* constants defined on Linux (thanks
+           Ronald van Dorp)
+
+        [BUGFIXES]
+         * Remember to SvGETMAGIC in getnameinfo() (RT79557)
+         * Quiet some compiler warnings (RT101495, RT100736)
+         * Fix "Attempt to free unreferenced scalar" warnings (RT78626, et.al.)
+
 2.016   2014/10/08 21:53:10
         [BUGFIXES]
          * Wrap configure tests in a {} block in case of C99-deficient
