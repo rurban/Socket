@@ -1,5 +1,10 @@
 Revision history for Socket
 
+2.018_001 2015/04/27 21:21:30
+        [BUGFIXES]
+         * Provide emnulations of inet_ntop/inet_pton on MSWin32 by using
+           WSAStringToAddress/WSAAddressToString
+
 2.018   2015/02/12 13:42:41
         [BUGFIXES]
          * Fix for "addr is not a string" test to use SvPOKp() before 5.18
