@@ -1,8 +1,8 @@
 Revision history for Socket
 
-2.018_001 2015/04/27 21:21:30
+2.019   2015/04/29 17:05:33
         [BUGFIXES]
-         * Provide emnulations of inet_ntop/inet_pton on MSWin32 by using
+         * Provide emulations of inet_ntop/inet_pton on MSWin32 by using
            WSAStringToAddress/WSAAddressToString
 
 2.018   2015/02/12 13:42:41
