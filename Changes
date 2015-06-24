@@ -1,5 +1,13 @@
 Revision history for Socket
 
+2.020   2015/06/24 14:45:25
+        [CHANGES]
+         * Provide more IPPROTO constants - IGMP, GRE, ESP, AH, SCTP
+        
+        [BUGFIXES]
+         * Provide an SvPVx_nolen wrapper for older perls (<5.8.8) that lack
+           it (RT104120)
+
 2.019   2015/04/29 17:05:33
         [BUGFIXES]
          * Provide emulations of inet_ntop/inet_pton on MSWin32 by using
