@@ -80,7 +80,7 @@ my %defines = (
     # -Dfoo                func()         $Config{key}
     HAS_GETADDRINFO  => [ "getaddrinfo",  "d_getaddrinfo" ],
     HAS_GETNAMEINFO  => [ "getnameinfo",  "d_getnameinfo" ],
-    HAS_GAI_STRERROR => [ "gai_strerror" ],
+    #HAS_GAI_STRERROR => [ "gai_strerror", "i_netdb" ],
     HAS_INET_ATON    => [ "inet_aton",    "d_inetaton" ],
     HAS_INETNTOP     => [ "inet_ntop",    "d_inetntop" ],
     HAS_INETPTON     => [ "inet_pton",    "d_inetpton" ],
@@ -132,10 +132,17 @@ check_for(
 );
 
 # TODO: Needs adding to perl5 core before importing dual-life again
+# It is only in cperl
 check_for(
     confkey => "i_netinet_ip",
     define  => "I_NETINET_IP",
     header  => "#include <netinet/ip.h>",
+);
+
+check_for(
+    confkey => "i_netinet_ip6",
+    define  => "I_NETINET_IP6",
+    header  => "#include <netinet/ip6.h>",
 );
 
 my %makefile_args;
@@ -181,13 +188,14 @@ my @names = (
 	IP_ADD_MEMBERSHIP IP_ADD_SOURCE_MEMBERSHIP IP_DROP_MEMBERSHIP
 	IP_DROP_SOURCE_MEMBERSHIP IP_HDRINCL IP_MULTICAST_IF IP_MULTICAST_LOOP
 	IP_MULTICAST_TTL IP_OPTIONS IP_RECVOPTS IP_RECVRETOPTS IP_RETOPTS IP_TOS
-	IP_TTL
+	IP_TTL IP_DONTFRAG
 
 	IPTOS_LOWDELAY IPTOS_THROUGHPUT IPTOS_RELIABILITY IPTOS_MINCOST
 
 	IPV6_ADD_MEMBERSHIP IPV6_DROP_MEMBERSHIP IPV6_JOIN_GROUP
 	IPV6_LEAVE_GROUP IPV6_MTU IPV6_MTU_DISCOVER IPV6_MULTICAST_HOPS
-	IPV6_MULTICAST_IF IPV6_MULTICAST_LOOP IPV6_UNICAST_HOPS IPV6_V6ONLY
+	IPV6_MULTICAST_IF IPV6_MULTICAST_LOOP IPV6_UNICAST_HOPS IPV6_NEXTHOP
+        IPV6_V6ONLY IPV6_REACHCONF IPV6_HOPLIMIT IPV6_USE_MIN_MTU IPV6_RECVPATHMTU
 
 	MSG_BCAST MSG_BTAG MSG_CTLFLAGS MSG_CTLIGNORE MSG_DONTWAIT MSG_EOF
 	MSG_EOR MSG_ERRQUEUE MSG_ETAG MSG_FASTOPEN MSG_FIN MSG_MAXIOVLEN
