@@ -14,7 +14,7 @@ sub check_for
 {
     my %args = @_;
     return if $ENV{PERL_CORE};
-    return if defined $Config{$args{confkey}};
+    return if defined $args{confkey} and defined $Config{$args{confkey}};
 
     require ExtUtils::CBuilder;
     $cb ||= ExtUtils::CBuilder->new( quiet => 1 );
@@ -77,12 +77,13 @@ sub check_for_func
 }
 
 my %defines = (
-    # -Dfoo               func()        $Config{key}
-    HAS_GETADDRINFO => [ "getaddrinfo", "d_getaddrinfo" ],
-    HAS_GETNAMEINFO => [ "getnameinfo", "d_getnameinfo" ],
-    HAS_INET_ATON   => [ "inet_aton",   "d_inetaton" ],
-    HAS_INETNTOP    => [ "inet_ntop",   "d_inetntop" ],
-    HAS_INETPTON    => [ "inet_pton",   "d_inetpton" ],
+    # -Dfoo                func()         $Config{key}
+    HAS_GETADDRINFO  => [ "getaddrinfo",  "d_getaddrinfo" ],
+    HAS_GETNAMEINFO  => [ "getnameinfo",  "d_getnameinfo" ],
+    #HAS_GAI_STRERROR => [ "gai_strerror", "i_netdb" ],
+    HAS_INET_ATON    => [ "inet_aton",    "d_inetaton" ],
+    HAS_INETNTOP     => [ "inet_ntop",    "d_inetntop" ],
+    HAS_INETPTON     => [ "inet_pton",    "d_inetpton" ],
 );
 
 foreach my $define ( sort keys %defines ) {
@@ -131,10 +132,17 @@ check_for(
 );
 
 # TODO: Needs adding to perl5 core before importing dual-life again
+# It is only in cperl
 check_for(
     confkey => "i_netinet_ip",
     define  => "I_NETINET_IP",
     header  => "#include <netinet/ip.h>",
+);
+
+check_for(
+    confkey => "i_netinet_ip6",
+    define  => "I_NETINET_IP6",
+    header  => "#include <netinet/ip6.h>",
 );
 
 my %makefile_args;
@@ -180,17 +188,19 @@ my @names = (
 	IP_ADD_MEMBERSHIP IP_ADD_SOURCE_MEMBERSHIP IP_DROP_MEMBERSHIP
 	IP_DROP_SOURCE_MEMBERSHIP IP_HDRINCL IP_MULTICAST_IF IP_MULTICAST_LOOP
 	IP_MULTICAST_TTL IP_OPTIONS IP_RECVOPTS IP_RECVRETOPTS IP_RETOPTS IP_TOS
-	IP_TTL
+	IP_TTL IP_DONTFRAG
 
 	IPTOS_LOWDELAY IPTOS_THROUGHPUT IPTOS_RELIABILITY IPTOS_MINCOST
 
 	IPV6_ADD_MEMBERSHIP IPV6_DROP_MEMBERSHIP IPV6_JOIN_GROUP
 	IPV6_LEAVE_GROUP IPV6_MTU IPV6_MTU_DISCOVER IPV6_MULTICAST_HOPS
-	IPV6_MULTICAST_IF IPV6_MULTICAST_LOOP IPV6_UNICAST_HOPS IPV6_V6ONLY
+	IPV6_MULTICAST_IF IPV6_MULTICAST_LOOP IPV6_UNICAST_HOPS IPV6_NEXTHOP
+        IPV6_V6ONLY IPV6_REACHCONF IPV6_HOPLIMIT IPV6_USE_MIN_MTU IPV6_RECVPATHMTU
 
 	MSG_BCAST MSG_BTAG MSG_CTLFLAGS MSG_CTLIGNORE MSG_DONTWAIT MSG_EOF
-	MSG_EOR MSG_ERRQUEUE MSG_ETAG MSG_FIN MSG_MAXIOVLEN MSG_MCAST
-	MSG_NOSIGNAL MSG_RST MSG_SYN MSG_TRUNC MSG_URG MSG_WAITALL MSG_WIRE
+	MSG_EOR MSG_ERRQUEUE MSG_ETAG MSG_FASTOPEN MSG_FIN MSG_MAXIOVLEN
+	MSG_MCAST MSG_NOSIGNAL MSG_RST MSG_SYN MSG_TRUNC MSG_URG MSG_WAITALL
+	MSG_WIRE
 
 	NI_DGRAM NI_IDN NI_IDN_ALLOW_UNASSIGNED NI_IDN_USE_STD3_ASCII_RULES
 	NI_NAMEREQD NI_NOFQDN NI_NUMERICHOST NI_NUMERICSERV
@@ -210,29 +220,35 @@ my @names = (
 
 	SOMAXCONN
 
-	SO_ACCEPTCONN SO_ATTACH_FILTER SO_BACKLOG SO_BROADCAST SO_CHAMELEON
-	SO_DEBUG SO_DETACH_FILTER SO_DGRAM_ERRIND SO_DOMAIN SO_DONTLINGER
-	SO_DONTROUTE SO_ERROR SO_FAMILY SO_KEEPALIVE SO_LINGER SO_OOBINLINE
-	SO_PASSCRED SO_PASSIFNAME SO_PEERCRED SO_PROTOCOL SO_PROTOTYPE
-	SO_RCVBUF SO_RCVLOWAT SO_RCVTIMEO SO_REUSEADDR SO_REUSEPORT
+	SO_ACCEPTCONN SO_ATTACH_FILTER SO_BACKLOG SO_BINDTODEVICE SO_BROADCAST
+	SO_BSDCOMPAT SO_BUSY_POLL SO_CHAMELEON SO_DEBUG SO_DETACH_FILTER
+	SO_DGRAM_ERRIND SO_DOMAIN SO_DONTLINGER SO_DONTROUTE SO_ERROR SO_FAMILY
+	SO_KEEPALIVE SO_LINGER SO_MARK SO_OOBINLINE SO_PASSCRED SO_PASSIFNAME
+	SO_PEEK_OFF SO_PEERCRED SO_PRIORITY SO_PROTOCOL SO_PROTOTYPE SO_RCVBUF
+	SO_RCVLOWAT SO_RCVTIMEO SO_REUSEADDR SO_REUSEPORT
 	SO_SECURITY_AUTHENTICATION SO_SECURITY_ENCRYPTION_NETWORK
 	SO_SECURITY_ENCRYPTION_TRANSPORT SO_SNDBUF SO_SNDLOWAT SO_SNDTIMEO
-	SO_STATE SO_TYPE SO_USELOOPBACK SO_XOPEN SO_XSE
+	SO_STATE SO_TIMESTAMP SO_TYPE SO_USELOOPBACK SO_XOPEN SO_XSE
 
-	TCP_CONGESTION TCP_CONNECTIONTIMEOUT TCP_CORK TCP_DEFER_ACCEPT TCP_INFO
-	TCP_INIT_CWND TCP_KEEPALIVE TCP_KEEPCNT TCP_KEEPIDLE TCP_KEEPINTVL
-	TCP_LINGER2 TCP_MAXRT TCP_MAXSEG TCP_MD5SIG TCP_NODELAY TCP_NOOPT
-	TCP_NOPUSH TCP_QUICKACK TCP_SACK_ENABLE TCP_STDURG TCP_SYNCNT
-	TCP_WINDOW_CLAMP
+	TCP_CONGESTION TCP_CONNECTIONTIMEOUT TCP_CORK TCP_DEFER_ACCEPT
+	TCP_FASTOPEN TCP_INFO TCP_INIT_CWND TCP_KEEPALIVE TCP_KEEPCNT
+	TCP_KEEPIDLE TCP_KEEPINTVL TCP_LINGER2 TCP_MAXRT TCP_MAXSEG
+	TCP_MD5SIG TCP_NODELAY TCP_NOOPT TCP_NOPUSH TCP_QUICKACK
+	TCP_SACK_ENABLE TCP_STDURG TCP_SYNCNT TCP_WINDOW_CLAMP
 
 	UIO_MAXIOV
     ),
     {name=>"IPPROTO_IP",   type=>"IV", default=>["IV",   0]},
     {name=>"IPPROTO_IPV6", type=>"IV", default=>["IV",  41]},
     {name=>"IPPROTO_RAW",  type=>"IV", default=>["IV", 255]},
-    {name=>"IPPROTO_ICMP", type=>"IV", default=>["IV",  1]},
-    {name=>"IPPROTO_TCP",  type=>"IV", default=>["IV",  6]},
-    {name=>"IPPROTO_UDP",  type=>"IV", default=>["IV", 17]},
+    {name=>"IPPROTO_ICMP", type=>"IV", default=>["IV",   1]},
+    {name=>"IPPROTO_IGMP", type=>"IV", default=>["IV",   2]},
+    {name=>"IPPROTO_TCP",  type=>"IV", default=>["IV",   6]},
+    {name=>"IPPROTO_UDP",  type=>"IV", default=>["IV",  17]},
+    {name=>"IPPROTO_GRE",  type=>"IV", default=>["IV",  47]},
+    {name=>"IPPROTO_ESP",  type=>"IV", default=>["IV",  50]},
+    {name=>"IPPROTO_AH",   type=>"IV", default=>["IV",  51]},
+    {name=>"IPPROTO_SCTP", type=>"IV", default=>["IV", 132]},
     {name=>"SHUT_RD",   type=>"IV", default=>["IV", "0"]},
     {name=>"SHUT_WR",   type=>"IV", default=>["IV", "1"]},
     {name=>"SHUT_RDWR", type=>"IV", default=>["IV", "2"]},

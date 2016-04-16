@@ -35,6 +35,12 @@
 #if defined(I_NETINET_IP)
 #  include <netinet/ip.h>
 #endif
+#if defined(I_NETINET_IP6)
+#  include <netinet/ip6.h>
+#endif
+#if defined(I_NETINET6_IN6)
+#  include <netinet6/in6.h>
+#endif
 #ifdef I_NETDB
 #  if !defined(ultrix)	/* Avoid double definition. */
 #   include <netdb.h>
@@ -49,6 +55,86 @@
 
 #if defined(WIN32) && !defined(UNDER_CE)
 # include <ws2tcpip.h>
+#endif
+
+#ifdef WIN32
+
+/* VC 6 with its original headers doesn't know about sockaddr_storage, VC 2003 does*/
+#ifndef _SS_MAXSIZE
+
+#  define _SS_MAXSIZE 128
+#  define _SS_ALIGNSIZE (sizeof(__int64))
+
+#  define _SS_PAD1SIZE (_SS_ALIGNSIZE - sizeof (short))
+#  define _SS_PAD2SIZE (_SS_MAXSIZE - (sizeof (short) + _SS_PAD1SIZE \
+                                                    + _SS_ALIGNSIZE))
+
+struct sockaddr_storage {
+    short ss_family;
+    char __ss_pad1[_SS_PAD1SIZE];
+    __int64 __ss_align;
+    char __ss_pad2[_SS_PAD2SIZE];
+};
+
+typedef int socklen_t;
+
+#define in6_addr in_addr6
+
+#define INET_ADDRSTRLEN  22
+#define INET6_ADDRSTRLEN 65
+
+#endif
+
+static int inet_pton(int af, const char *src, void *dst)
+{
+  struct sockaddr_storage ss;
+  int size = sizeof(ss);
+  ss.ss_family = af; /* per MSDN */
+
+  if (WSAStringToAddress((char*)src, af, NULL, (struct sockaddr *)&ss, &size) != 0)
+    return 0;
+
+  switch(af) {
+    case AF_INET:
+      *(struct in_addr *)dst = ((struct sockaddr_in *)&ss)->sin_addr;
+      return 1;
+    case AF_INET6:
+      *(struct in6_addr *)dst = ((struct sockaddr_in6 *)&ss)->sin6_addr;
+      return 1;
+    default:
+      WSASetLastError(WSAEAFNOSUPPORT);
+      return -1;
+  }
+}
+
+static const char *inet_ntop(int af, const void *src, char *dst, socklen_t size)
+{
+  struct sockaddr_storage ss;
+  unsigned long s = size;
+
+  ZeroMemory(&ss, sizeof(ss));
+  ss.ss_family = af;
+
+  switch(af) {
+    case AF_INET:
+      ((struct sockaddr_in *)&ss)->sin_addr = *(struct in_addr *)src;
+      break;
+    case AF_INET6:
+      ((struct sockaddr_in6 *)&ss)->sin6_addr = *(struct in6_addr *)src;
+      break;
+    default:
+      return NULL;
+  }
+
+  /* cannot directly use &size because of strict aliasing rules */
+  if (WSAAddressToString((struct sockaddr *)&ss, sizeof(ss), NULL, dst, &s) != 0)
+    return NULL;
+  else
+    return dst;
+}
+
+#define HAS_INETPTON
+#define HAS_INETNTOP
 #endif
 
 #ifdef NETWARE
@@ -78,6 +164,10 @@ NETINET_DEFINE_CONTEXT
 # define INADDR_LOOPBACK	 0x7F000001
 #endif /* INADDR_LOOPBACK */
 
+#ifndef INET_ADDRSTRLEN
+#define INET_ADDRSTRLEN 16
+#endif
+
 #ifndef C_ARRAY_LENGTH
 #define C_ARRAY_LENGTH(arr) (sizeof(arr) / sizeof(*(arr)))
 #endif /* !C_ARRAY_LENGTH */
@@ -94,8 +184,16 @@ NETINET_DEFINE_CONTEXT
 # define Newx(v,n,t) New(0,v,n,t)
 #endif /* !Newx */
 
+#ifndef SvPVx_nolen
+#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#  define SvPVx_nolen(sv) ({SV *_sv = (sv); SvPV_nolen(_sv); })
+#else /* __GNUC__ */
+#  define SvPVx_nolen(sv) ((PL_Sv = (sv)), SvPV_nolen(PL_Sv))
+#endif /* __GNU__ */
+#endif /* !SvPVx_nolen */
+
 #ifndef croak_sv
-# define croak_sv(sv)	croak(SvPV_nolen(sv))
+# define croak_sv(sv)	croak(SvPVx_nolen(sv))
 #endif
 
 #ifndef hv_stores
@@ -381,6 +479,65 @@ not_here(const char *s)
 
 #include "const-c.inc"
 
+#if defined(HAS_GETADDRINFO) && !defined(I_NETDB)
+static const char *gai_strerror(int err)
+{
+  switch (err)
+  {
+#ifdef EAI_ADDRFAMILY
+  case EAI_ADDRFAMILY:
+    return "Address family for hostname is not supported.";
+#endif
+#ifdef EAI_AGAIN
+  case EAI_AGAIN:
+    return "The name could not be resolved at this time.";
+#endif
+#ifdef EAI_BADFLAGS
+  case EAI_BADFLAGS:
+    return "The flags parameter has an invalid value.";
+#endif
+#ifdef EAI_FAIL
+  case EAI_FAIL:
+    return "A non-recoverable error occurred while resolving the name.";
+#endif
+#ifdef EAI_FAMILY
+  case EAI_FAMILY:
+    return "The address family was not recognized or length is invalid.";
+#endif
+#ifdef EAI_MEMORY
+  case EAI_MEMORY:
+    return "A memory allocation failure occurred.";
+#endif
+#ifdef EAI_NODATA
+  case EAI_NODATA:
+    return "No address is associated with the hostname.";
+#endif
+#ifdef EAI_NONAME
+  case EAI_NONAME:
+    return "The name does not resolve for the supplied parameters.";
+#endif
+#ifdef EAI_OVERFLOW
+  case EAI_OVERFLOW:
+    return "An argument buffer overflowed.";
+#endif
+#ifdef EAI_SERVICE
+  case EAI_SERVICE:
+    return "The service parameter was not recognized for the specified socket type.";
+#endif
+#ifdef EAI_SOCKTYPE
+  case EAI_SOCKTYPE:
+    return "The specified socket type was not recognized.";
+#endif
+#ifdef EAI_SYSTEM
+  case EAI_SYSTEM:
+    return "A system error occurred - see errno.";
+#endif
+  default:
+    return "Unknown error in getaddrinfo().";
+  }
+}
+#endif
+
 #ifdef HAS_GETADDRINFO
 static SV *err_to_SV(pTHX_ int err)
 {
@@ -530,6 +687,7 @@ static void xs_getnameinfo(pTHX_ CV *cv)
 	SP -= items;
 
 	addr = ST(0);
+	SvGETMAGIC(addr);
 
 	if(items < 2)
 		flags = 0;
@@ -544,7 +702,7 @@ static void xs_getnameinfo(pTHX_ CV *cv)
 	want_host = !(xflags & NIx_NOHOST);
 	want_serv = !(xflags & NIx_NOSERV);
 
-	if(!SvPOK(addr))
+	if(!SvPOKp(addr))
 		croak("addr is not a string");
 
 	addr_len = SvCUR(addr);
@@ -600,13 +758,13 @@ inet_aton(host)
 		ST(0) = sv_2mortal(newSVpvn((char *)&ip_address, sizeof(ip_address)));
 		XSRETURN(1);
 	}
-
+#ifdef HAS_GETHOSTBYNAME
 	phe = gethostbyname(host);
 	if (phe && phe->h_addrtype == AF_INET && phe->h_length == 4) {
 		ST(0) = sv_2mortal(newSVpvn((char *)phe->h_addr, phe->h_length));
 		XSRETURN(1);
 	}
-
+#endif
 	XSRETURN_UNDEF;
 	}
 
@@ -635,10 +793,10 @@ inet_ntoa(ip_address_sv)
 	 * so let's use this sprintf() workaround everywhere.
 	 * This is also more threadsafe than using inet_ntoa(). */
 	ST(0) = sv_2mortal(Perl_newSVpvf(aTHX_ "%d.%d.%d.%d", /* IPv6? */
-					 ((addr.s_addr >> 24) & 0xFF),
-					 ((addr.s_addr >> 16) & 0xFF),
-					 ((addr.s_addr >>  8) & 0xFF),
-					 ( addr.s_addr        & 0xFF)));
+					 (int)((addr.s_addr >> 24) & 0xFF),
+					 (int)((addr.s_addr >> 16) & 0xFF),
+					 (int)((addr.s_addr >>  8) & 0xFF),
+					 (int)( addr.s_addr        & 0xFF)));
 	}
 
 void
@@ -793,10 +951,10 @@ pack_sockaddr_in(port, ip_address_sv)
 	ip_address = SvPVbyte(ip_address_sv, addrlen);
 	if (addrlen == sizeof(addr) || addrlen == 4)
 		addr.s_addr =
-		    (ip_address[0] & 0xFF) << 24 |
-		    (ip_address[1] & 0xFF) << 16 |
-		    (ip_address[2] & 0xFF) <<  8 |
-		    (ip_address[3] & 0xFF);
+		    (unsigned int)(ip_address[0] & 0xFF) << 24 |
+		    (unsigned int)(ip_address[1] & 0xFF) << 16 |
+		    (unsigned int)(ip_address[2] & 0xFF) <<  8 |
+		    (unsigned int)(ip_address[3] & 0xFF);
 	else
 		croak("Bad arg length for %s, length is %"UVuf", should be %"UVuf,
 		      "Socket::pack_sockaddr_in",
@@ -876,6 +1034,8 @@ pack_sockaddr_in6(port, sin6_addr, scope_id=0, flowinfo=0)
 #  endif
 	ST(0) = sv_2mortal(newSVpvn((char *)&sin6, sizeof(sin6)));
 #else
+	PERL_UNUSED_VAR(port);
+	PERL_UNUSED_VAR(sin6_addr);
 	ST(0) = (SV*)not_here("pack_sockaddr_in6");
 #endif
 	}
@@ -914,6 +1074,7 @@ unpack_sockaddr_in6(sin6_sv)
 	    mPUSHs(ip_address_sv);
 	}
 #else
+	PERL_UNUSED_VAR(sin6_sv);
 	ST(0) = (SV*)not_here("pack_sockaddr_in6");
 #endif
 	}
@@ -973,6 +1134,8 @@ inet_ntop(af, ip_address_sv)
 
 	ST(0) = sv_2mortal(newSVpvn(str, strlen(str)));
 #else
+	PERL_UNUSED_VAR(af);
+	PERL_UNUSED_VAR(ip_address_sv);
 	ST(0) = (SV*)not_here("inet_ntop");
 #endif
 
@@ -1015,6 +1178,8 @@ inet_pton(af, host)
 		sv_setpvn( ST(0), (char *)&ip_address, addrlen);
 	}
 #else
+	PERL_UNUSED_VAR(af);
+	PERL_UNUSED_VAR(host);
 	ST(0) = (SV*)not_here("inet_pton");
 #endif
 
@@ -1116,6 +1281,8 @@ pack_ip_mreq_source(multiaddr, source, interface=&PL_sv_undef)
 		mreq.imr_interface.s_addr = INADDR_ANY;
 	ST(0) = sv_2mortal(newSVpvn((char *)&mreq, sizeof(mreq)));
 #else
+	PERL_UNUSED_VAR(multiaddr);
+	PERL_UNUSED_VAR(source);
 	not_here("pack_ip_mreq_source");
 #endif
 	}
@@ -1138,6 +1305,7 @@ unpack_ip_mreq_source(mreq_sv)
 	mPUSHp((char *)&mreq.imr_sourceaddr, sizeof(mreq.imr_sourceaddr));
 	mPUSHp((char *)&mreq.imr_interface, sizeof(mreq.imr_interface));
 #else
+	PERL_UNUSED_VAR(mreq_sv);
 	not_here("unpack_ip_mreq_source");
 #endif
 	}
@@ -1163,6 +1331,8 @@ pack_ipv6_mreq(multiaddr, ifindex)
 	mreq.ipv6mr_interface = ifindex;
 	ST(0) = sv_2mortal(newSVpvn((char *)&mreq, sizeof(mreq)));
 #else
+	PERL_UNUSED_VAR(multiaddr);
+	PERL_UNUSED_VAR(ifindex);
 	not_here("pack_ipv6_mreq");
 #endif
 	}
@@ -1184,6 +1354,7 @@ unpack_ipv6_mreq(mreq_sv)
 	mPUSHp((char *)&mreq.ipv6mr_multiaddr, sizeof(mreq.ipv6mr_multiaddr));
 	mPUSHi(mreq.ipv6mr_interface);
 #else
+	PERL_UNUSED_VAR(mreq_sv);
 	not_here("unpack_ipv6_mreq");
 #endif
 	}

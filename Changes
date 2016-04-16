@@ -1,5 +1,9 @@
 Revision history for Socket
 
+2.021_01 2016-04-16 23:35:51 rurban
+        * Add more IPV6 constants.
+	* Include netinet/ip.h, netinet/ip6.h, netinet6/in6.h if valid.
+
 2.016   2014/10/08 21:53:10
         [BUGFIXES]
          * Wrap configure tests in a {} block in case of C99-deficient
