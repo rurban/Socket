@@ -10,7 +10,7 @@
    ],
    "meta-spec" : {
       "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
-      "version" : 2
+      "version" : "2"
    },
    "name" : "Socket",
    "no_index" : {
@@ -38,6 +38,6 @@
       }
    },
    "release_status" : "testing",
-   "version" : "2.021_01",
-   "x_serialization_backend" : "Cpanel::JSON::XS version 3.0213"
+   "version" : "2.021_02",
+   "x_serialization_backend" : "JSON::PP version 2.27300"
 }
