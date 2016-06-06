@@ -1,5 +1,12 @@
 Revision history for Socket
 
+2.021_02 2016-06-06 11:57:00 rurban
+        * Silence -Wlogical-op warnings
+        [BUGFIXES]
+        * Fix my to our $XS_VERSION
+        * Check for max length before derefing by length (jhi)
+          RT #111707
+
 2.021_01 2016-04-16 23:35:51 rurban
         * Add more IPV6 constants.
 	* Include netinet/ip.h, netinet/ip6.h, netinet6/in6.h if valid.
