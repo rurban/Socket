@@ -10,7 +10,7 @@ use Socket qw(
     sockaddr_family
     sockaddr_un
 );
-use Test::More tests => 33;
+use Test::More tests => 44;
 
 # inet_aton, inet_ntoa
 {
@@ -80,6 +80,17 @@ SKIP: {
 
     is(sockaddr_family(scalar sockaddr_in(200,v10.30.50.70)), AF_INET,
         'sockaddr_in in scalar context packs');
+
+    my $warnings = 0;
+    local $SIG{__WARN__} = sub { $warnings++ };
+    ok( !eval { pack_sockaddr_in undef, ""; 1 },
+        'pack_sockaddr_in undef port is fatal' );
+    ok( !eval { pack_sockaddr_in 0, undef; 1 },
+        'pack_sockaddr_in undef addr is fatal' );
+    ok( !eval { unpack_sockaddr_in undef; 1 },
+        'unpack_sockaddr_in undef is fatal' );
+
+    is( $warnings, 0, 'undefined values produced no warnings' );
 }
 
 # pack_sockaddr_in6, unpack_sockaddr_in6
@@ -104,6 +115,17 @@ SKIP: {
 
     is(sockaddr_family(scalar Socket::sockaddr_in6(0x1357, "02468ace13579bdf")), $AF_INET6,
         'sockaddr_in6 in scalar context packs' );
+
+    my $warnings = 0;
+    local $SIG{__WARN__} = sub { $warnings++ };
+    ok( !eval { Socket::pack_sockaddr_in6( undef, "" ); 1 },
+        'pack_sockaddr_in6 undef port is fatal' );
+    ok( !eval { Socket::pack_sockaddr_in6( 0, undef ); 1 },
+        'pack_sockaddr_in6 undef addr is fatal' );
+    ok( !eval { Socket::unpack_sockaddr_in6( undef ); 1 },
+        'unpack_sockaddr_in6 undef is fatal' );
+
+    is( $warnings, 0, 'undefined values produced no warnings' );
 }
 
 # sockaddr_un
@@ -118,6 +140,15 @@ SKIP: {
 
     # see if we calculate the address structure length correctly
     is(length ($test_abstract_socket) + 2, length $addr, 'sockaddr_un abstract address length');
+
+    my $warnings = 0;
+    local $SIG{__WARN__} = sub { $warnings++ };
+    ok( !eval { pack_sockaddr_un( undef ); 1 },
+        'pack_sockaddr_un undef path is fatal' );
+    ok( !eval { unpack_sockaddr_un( undef ); 1 },
+        'unpack_sockaddr_un undef is fatal' );
+
+    is( $warnings, 0, 'undefined values produced no warnings' );
 }
 
 # warnings

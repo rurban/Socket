@@ -3,9 +3,7 @@ package Socket;
 use strict;
 { use 5.006001; }
 
-our $VERSION = '2.021_02';
-our $XS_VERSION = $VERSION;   # A dev xs version needs to be global, not my
-$VERSION = eval $VERSION;
+our $VERSION = '2.022';
 
 =head1 NAME
 
@@ -858,7 +856,7 @@ sub sockaddr_un {
     }
 }
 
-XSLoader::load(__PACKAGE__, $XS_VERSION);
+XSLoader::load(__PACKAGE__, $VERSION);
 
 my %errstr;
 
