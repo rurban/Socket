@@ -131,7 +131,7 @@ SKIP: {
 # sockaddr_un
 SKIP: {
     # see if we can handle abstract sockets
-    skip "Abstract AF_UNIX paths unsupported", 2 unless $^O eq "linux";
+    skip "Abstract AF_UNIX paths unsupported", 5 unless $^O eq "linux";
 
     my $test_abstract_socket = chr(0) . '/org/perl/hello'. chr(0) . 'world';
     my $addr = sockaddr_un ($test_abstract_socket);

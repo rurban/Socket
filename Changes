@@ -1,5 +1,13 @@
 Revision history for Socket
 
+2.023   2016/08/02 14:50:50
+        [CHANGES]
+         * Add more socket(7), ip(7) and ipv6(7) socket options from Linux
+
+        [BUGFIXES]
+         * Fix skip count for abstract AF_UNIX path tests when not running on
+           Linux
+
 2.022   2016/08/01 16:02:48
         [CHANGES]
          * Throw exceptions if pack/unpack sockaddr functions are passed
