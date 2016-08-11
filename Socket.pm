@@ -3,7 +3,7 @@ package Socket;
 use strict;
 { use 5.006001; }
 
-our $VERSION = '2.023';
+our $VERSION = '2.024';
 
 =head1 NAME
 
@@ -184,6 +184,9 @@ arguments packed in and C<AF_INET> filled in. For Internet domain sockets,
 this structure is normally what you need for the arguments in bind(),
 connect(), and send().
 
+An undefined $port argument is taken as zero; an undefined $ip_address is
+considered a fatal error.
+
 =head2 ($port, $ip_address) = unpack_sockaddr_in $sockaddr
 
 Takes a C<sockaddr_in> structure (as returned by pack_sockaddr_in(),
@@ -212,6 +215,9 @@ Takes two to four arguments, a port number, an opaque string (as returned by
 inet_pton()), optionally a scope ID number, and optionally a flow label
 number. Returns the C<sockaddr_in6> structure with those arguments packed in
 and C<AF_INET6> filled in. IPv6 equivalent of pack_sockaddr_in().
+
+An undefined $port argument is taken as zero; an undefined $ip6_address is
+considered a fatal error.
 
 =head2 ($port, $ip6_address, $scope_id, $flowinfo) = unpack_sockaddr_in6 $sockaddr
 

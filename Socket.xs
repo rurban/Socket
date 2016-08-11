@@ -823,8 +823,11 @@ pack_sockaddr_un(pathname)
 	Zero(&sun_ad, sizeof(sun_ad), char);
 	sun_ad.sun_family = AF_UNIX;
 	pathname_pv = SvPV(pathname,len);
-	if (len > sizeof(sun_ad.sun_path))
+	if (len > sizeof(sun_ad.sun_path)) {
+	    warn("Path length (%d) is longer than maximum supported length"
+	         " (%d) and will be truncated", len, sizeof(sun_ad.sun_path));
 	    len = sizeof(sun_ad.sun_path);
+	}
 #  ifdef OS2	/* Name should start with \socket\ and contain backslashes! */
 	{
 		int off;
@@ -945,11 +948,10 @@ pack_sockaddr_in(port_sv, ip_address_sv)
 	struct sockaddr_in sin;
 	struct in_addr addr;
 	STRLEN addrlen;
-	unsigned short port;
+	unsigned short port = 0;
 	char * ip_address;
-	if (!SvOK(port_sv))
-		croak("Undefined port for %s", "Socket::pack_sockaddr_in");
-	port = SvUV(port_sv);
+	if (SvOK(port_sv))
+		port = SvUV(port_sv);
 	if (!SvOK(ip_address_sv))
 		croak("Undefined address for %s", "Socket::pack_sockaddr_in");
 	if (DO_UTF8(ip_address_sv) && !sv_utf8_downgrade(ip_address_sv, 1))
@@ -1017,13 +1019,12 @@ pack_sockaddr_in6(port_sv, sin6_addr, scope_id=0, flowinfo=0)
 	CODE:
 	{
 #ifdef HAS_SOCKADDR_IN6
-	unsigned short port;
+	unsigned short port = 0;
 	struct sockaddr_in6 sin6;
 	char * addrbytes;
 	STRLEN addrlen;
-	if (!SvOK(port_sv))
-		croak("Undefined port for %s", "Socket::pack_sockaddr_in6");
-	port = SvUV(port_sv);
+	if (SvOK(port_sv))
+		port = SvUV(port_sv);
 	if (!SvOK(sin6_addr))
 		croak("Undefined address for %s", "Socket::pack_sockaddr_in6");
 	if (DO_UTF8(sin6_addr) && !sv_utf8_downgrade(sin6_addr, 1))

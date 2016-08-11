@@ -1,5 +1,13 @@
 Revision history for Socket
 
+2.024   2016/08/11 13:49:48
+        [BUGFIXES]
+         * Restore back-compat to pre-2.011 behaviour on undefined port
+           numbers to pack_sockaddr_in(6?) - silently accept undef as zero
+           (RT116699)
+         * Warn if pack_sockaddr_un is truncating an overly long path
+           (mitigates but does not resolve RT116819)
+
 2.023   2016/08/02 14:50:50
         [CHANGES]
          * Add more socket(7), ip(7) and ipv6(7) socket options from Linux
