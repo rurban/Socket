@@ -35,6 +35,12 @@
 #if defined(I_NETINET_IP)
 #  include <netinet/ip.h>
 #endif
+#if defined(I_NETINET_IP6)
+#  include <netinet/ip6.h>
+#endif
+#if defined(I_NETINET6_IN6)
+#  include <netinet6/in6.h>
+#endif
 #ifdef I_NETDB
 #  if !defined(ultrix)	/* Avoid double definition. */
 #   include <netdb.h>
@@ -49,6 +55,11 @@
 
 #if defined(WIN32) && !defined(UNDER_CE)
 # include <ws2tcpip.h>
+#endif
+
+#ifndef GCC_DIAG_IGNORE
+#  define GCC_DIAG_IGNORE(w)
+#  define GCC_DIAG_RESTORE
 #endif
 
 #ifdef WIN32
@@ -473,7 +484,7 @@ not_here(const char *s)
 
 #include "const-c.inc"
 
-#if defined(HAS_GETADDRINFO) && !defined(HAS_GAI_STRERROR)
+#if defined(HAS_GETADDRINFO) && !defined(I_NETDB)
 static const char *gai_strerror(int err)
 {
   switch (err)
@@ -773,7 +784,8 @@ inet_ntoa(ip_address_sv)
 	if (DO_UTF8(ip_address_sv) && !sv_utf8_downgrade(ip_address_sv, 1))
 		croak("Wide character in %s", "Socket::inet_ntoa");
 	ip_address = SvPVbyte(ip_address_sv, addrlen);
-	if (addrlen == sizeof(addr) || addrlen == 4)
+        GCC_DIAG_IGNORE(-Wlogical-op)
+        if ((addrlen == sizeof(addr)) || (addrlen == 4))
 		addr.s_addr =
 		    (ip_address[0] & 0xFF) << 24 |
 		    (ip_address[1] & 0xFF) << 16 |
@@ -782,6 +794,7 @@ inet_ntoa(ip_address_sv)
 	else
 		croak("Bad arg length for %s, length is %"UVuf", should be %"UVuf,
 		      "Socket::inet_ntoa", (UV)addrlen, (UV)sizeof(addr));
+        GCC_DIAG_RESTORE
 	/* We could use inet_ntoa() but that is broken
 	 * in HP-UX + GCC + 64bitint (returns "0.0.0.0"),
 	 * so let's use this sprintf() workaround everywhere.
@@ -825,7 +838,7 @@ pack_sockaddr_un(pathname)
 	pathname_pv = SvPV(pathname,len);
 	if (len > sizeof(sun_ad.sun_path)) {
 	    warn("Path length (%d) is longer than maximum supported length"
-	         " (%d) and will be truncated", len, sizeof(sun_ad.sun_path));
+	         " (%d) and will be truncated", (int)len, (int)sizeof(sun_ad.sun_path));
 	    len = sizeof(sun_ad.sun_path);
 	}
 #  ifdef OS2	/* Name should start with \socket\ and contain backslashes! */
@@ -957,7 +970,8 @@ pack_sockaddr_in(port_sv, ip_address_sv)
 	if (DO_UTF8(ip_address_sv) && !sv_utf8_downgrade(ip_address_sv, 1))
 		croak("Wide character in %s", "Socket::pack_sockaddr_in");
 	ip_address = SvPVbyte(ip_address_sv, addrlen);
-	if (addrlen == sizeof(addr) || addrlen == 4)
+        GCC_DIAG_IGNORE(-Wlogical-op)
+        if ((addrlen == sizeof(addr)) || (addrlen == 4))
 		addr.s_addr =
 		    (unsigned int)(ip_address[0] & 0xFF) << 24 |
 		    (unsigned int)(ip_address[1] & 0xFF) << 16 |
@@ -967,6 +981,7 @@ pack_sockaddr_in(port_sv, ip_address_sv)
 		croak("Bad arg length for %s, length is %"UVuf", should be %"UVuf,
 		      "Socket::pack_sockaddr_in",
 		      (UV)addrlen, (UV)sizeof(addr));
+        GCC_DIAG_RESTORE
 	Zero(&sin, sizeof(sin), char);
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(port);
