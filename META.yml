@@ -20,5 +20,5 @@ no_index:
     - inc
 requires:
   perl: '5.006001'
-version: 2.024_01
+version: 2.024_02
 x_serialization_backend: YAML::XS version 0.70
