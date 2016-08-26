@@ -1,5 +1,8 @@
 Revision history for Socket
 
+2.024_01 2016-08-26 19:45:11 rurban
+        * Merge back from cperl RURBAN/Socket-2.021_02.tar.gz
+
 2.024   2016/08/11 13:49:48
         [BUGFIXES]
          * Restore back-compat to pre-2.011 behaviour on undefined port
@@ -23,6 +26,13 @@ Revision history for Socket
 
         [BUGFIXES]
          * Fix coverty complaint (RT111707)
+
+2.021_02 2016-06-06 11:57:00 rurban
+        * Silence -Wlogical-op warnings
+
+2.021_01 2016-04-16 23:35:51 rurban
+        * Add more IPV6 constants.
+	* Include netinet/ip.h, netinet/ip6.h, netinet6/in6.h if valid.
 
 2.021   2015/11/18 17:09:13
         [CHANGES]
