@@ -694,7 +694,6 @@ Paul Evans <leonerd@leonerd.org.uk>
 
 =cut
 
-use Carp;
 use warnings::register;
 
 require Exporter;
@@ -830,6 +829,8 @@ BEGIN {
     # The definitions in Socket.pm and Socket.xs must match
     sub NIx_NOHOST() {1 << 0}
     sub NIx_NOSERV() {1 << 1}
+
+    sub croak($) { require Carp; Carp::croak(@_) }
 }
 
 *CR   = \CR();
