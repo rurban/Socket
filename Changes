@@ -1,5 +1,8 @@
 Revision history for Socket
 
+2.024_03 2016-10-04 rurban
+	* Fixes for OpenBSD: Probe for F<netinet/in_systm.h>
+
 2.024_02 2016-08-27 00:30:50 rurban
         * Windows fixes w/o IPV6
 
