@@ -1,5 +1,10 @@
 Revision history for Socket
 
+2.024_04 2016-10-05 rurban
+        * Fix for cperl I_NETINET6_I6 typo: removed.
+        * Do not include netinet6/in6.h directly
+        * Sign the releases
+
 2.024_03 2016-10-04 rurban
 	* Fixes for OpenBSD: Probe for F<netinet/in_systm.h>
 
