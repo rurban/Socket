@@ -3,9 +3,7 @@ package Socket;
 use strict;
 { use 5.006001; }
 
-our $VERSION = '2.024_03';
-our $XS_VERSION = $VERSION;   # A dev xs version needs to be global, not my
-$VERSION = eval $VERSION;
+our $VERSION = '2.025';
 
 =head1 NAME
 
@@ -775,7 +773,7 @@ our @EXPORT_OK = qw(
 
 	IPPROTO_IP IPPROTO_IPV6 IPPROTO_RAW IPPROTO_ICMP IPPROTO_IGMP
 	IPPROTO_TCP IPPROTO_UDP IPPROTO_GRE IPPROTO_ESP IPPROTO_AH
-	IPPROTO_SCTP
+	IPPROTO_ICMPV6 IPPROTO_SCTP
 
 	IP_PMTUDISC_DO IP_PMTUDISC_DONT IP_PMTUDISC_PROBE IP_PMTUDISC_WANT
 
@@ -874,7 +872,7 @@ sub sockaddr_un {
     }
 }
 
-XSLoader::load(__PACKAGE__, $XS_VERSION);
+XSLoader::load(__PACKAGE__, $VERSION);
 
 my %errstr;
 
