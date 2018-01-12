@@ -197,6 +197,10 @@ NETINET_DEFINE_CONTEXT
 #endif /* __GNU__ */
 #endif /* !SvPVx_nolen */
 
+#ifndef croak_sv
+# define croak_sv(sv)	croak("%s", SvPVx_nolen(sv))
+#endif
+
 #ifndef hv_stores
 # define hv_stores(hv, keystr, val) \
 	hv_store(hv, ""keystr"", sizeof(keystr)-1, val, 0)

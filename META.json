@@ -1,7 +1,7 @@
 {
    "abstract" : "networking constants and support functions",
    "author" : [
-      "unknown"
+      "rurban"
    ],
    "dynamic_config" : 1,
    "generated_by" : "ExtUtils::MakeMaker version 8.3506, CPAN::Meta::Converter version 2.150010",
@@ -37,7 +37,7 @@
          }
       }
    },
-   "release_status" : "unstable",
-   "version" : "2.026_04",
+   "release_status" : "stable",
+   "version" : "2.027_04",
    "x_serialization_backend" : "JSON::PP version 2.97001_04"
 }
