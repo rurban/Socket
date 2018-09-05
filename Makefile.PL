@@ -13,7 +13,7 @@ my $seq = 0;
 sub check_for
 {
     my %args = @_;
-    return if $ENV{PERL_CORE};
+    return if $ENV{PERL_CORE}; # already included in Configure probes
     return if defined $args{confkey} and defined $Config{$args{confkey}};
 
     require ExtUtils::CBuilder;
@@ -131,11 +131,24 @@ check_for(
     main    => "struct ipv6_mreq mreq; mreq.ipv6mr_interface = 0;"
 );
 
-# TODO: Needs adding to perl5 core before importing dual-life again
+# TODO: Needs adding to perl5 core before importing dual-life again.
+# Only done in cperl.
+check_for(
+    confkey => "i_netinet_in_systm",
+    define  => "I_NETINET_IN_SYSTM",
+    header  => "#include <netinet/in_systm.h>",
+);
+
 check_for(
     confkey => "i_netinet_ip",
     define  => "I_NETINET_IP",
     header  => "#include <netinet/ip.h>",
+);
+
+check_for(
+    confkey => "i_netinet_ip6",
+    define  => "I_NETINET_IP6",
+    header  => "#include <netinet/ip6.h>",
 );
 
 my %makefile_args;
@@ -159,6 +172,7 @@ WriteMakefile(
     },
     MIN_PERL_VERSION => '5.006001',
     LICENSE       => 'perl',
+    SIGN          => 1,
     %makefile_args,
 );
 my @names = (
@@ -182,7 +196,7 @@ my @names = (
 	IP_DROP_MEMBERSHIP IP_DROP_SOURCE_MEMBERSHIP IP_FREEBIND IP_HDRINCL
 	IP_MULTICAST_ALL IP_MULTICAST_IF IP_MULTICAST_LOOP IP_MULTICAST_TTL
 	IP_MTU IP_MTU_DISCOVER IP_NODEFRAG IP_OPTIONS IP_RECVERR IP_RECVOPTS
-	IP_RECVRETOPTS IP_RETOPTS IP_TOS IP_TRANSPARENT IP_TTL
+	IP_RECVRETOPTS IP_RETOPTS IP_TOS IP_TRANSPARENT IP_TTL IP_DONTFRAG
 
 	IP_PMTUDISC_DO IP_PMTUDISC_DONT IP_PMTUDISC_PROBE IP_PMTUDISC_WANT
 
@@ -192,6 +206,7 @@ my @names = (
 	IPV6_LEAVE_GROUP IPV6_MTU IPV6_MTU_DISCOVER IPV6_MULTICAST_HOPS
 	IPV6_MULTICAST_IF IPV6_MULTICAST_LOOP IPV6_RECVERR IPV6_ROUTER_ALERT
 	IPV6_UNICAST_HOPS IPV6_V6ONLY
+	IPV6_NEXTHOP IPV6_REACHCONF IPV6_HOPLIMIT IPV6_USE_MIN_MTU IPV6_RECVPATHMTU
 
 	MSG_BCAST MSG_BTAG MSG_CTLFLAGS MSG_CTLIGNORE MSG_DONTWAIT MSG_EOF
 	MSG_EOR MSG_ERRQUEUE MSG_ETAG MSG_FASTOPEN MSG_FIN MSG_MAXIOVLEN

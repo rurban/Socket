@@ -22,8 +22,8 @@
 #ifdef I_SYS_UN
 #  include <sys/un.h>
 #endif
-/* XXX Configure test for <netinet/in_systm.h needed XXX */
-#if defined(NeXT) || defined(__NeXT__)
+/* NeXT or OpenBSD: this defines n_time needed in netinet/ip.h */
+#if defined(I_NETINET_IN_SYSTM)
 #  include <netinet/in_systm.h>
 #endif
 #if defined(__sgi) && !defined(AF_LINK) && defined(PF_LINK) && PF_LINK == AF_LNK
@@ -35,6 +35,10 @@
 #if defined(I_NETINET_IP)
 #  include <netinet/ip.h>
 #endif
+#if defined(I_NETINET_IP6)
+#  include <netinet/ip6.h>
+#endif
+/* netinet6/in6.h is loaded by netinet/in.h: see RFC2553 */
 #ifdef I_NETDB
 #  if !defined(ultrix)	/* Avoid double definition. */
 #   include <netdb.h>
@@ -49,6 +53,13 @@
 
 #if defined(WIN32) && !defined(UNDER_CE)
 # include <ws2tcpip.h>
+#endif
+
+#if defined(__clang__) || defined(__clang) || !defined(GCC_DIAG_IGNORE)
+#  undef GCC_DIAG_IGNORE
+#  undef GCC_DIAG_RESTORE
+#  define GCC_DIAG_IGNORE(w)
+#  define GCC_DIAG_RESTORE
 #endif
 
 #ifdef WIN32
@@ -773,7 +784,8 @@ inet_ntoa(ip_address_sv)
 	if (DO_UTF8(ip_address_sv) && !sv_utf8_downgrade(ip_address_sv, 1))
 		croak("Wide character in %s", "Socket::inet_ntoa");
 	ip_address = SvPVbyte(ip_address_sv, addrlen);
-	if (addrlen == sizeof(addr) || addrlen == 4)
+        GCC_DIAG_IGNORE(-Wlogical-op)
+        if ((addrlen == sizeof(addr)) || (addrlen == 4))
 		addr.s_addr =
 		    (ip_address[0] & 0xFF) << 24 |
 		    (ip_address[1] & 0xFF) << 16 |
@@ -783,6 +795,7 @@ inet_ntoa(ip_address_sv)
 		croak("Bad arg length for %s, length is %" UVuf
                       ", should be %" UVuf,
 		      "Socket::inet_ntoa", (UV)addrlen, (UV)sizeof(addr));
+        GCC_DIAG_RESTORE
 	/* We could use inet_ntoa() but that is broken
 	 * in HP-UX + GCC + 64bitint (returns "0.0.0.0"),
 	 * so let's use this sprintf() workaround everywhere.
@@ -962,7 +975,8 @@ pack_sockaddr_in(port_sv, ip_address_sv)
 	if (DO_UTF8(ip_address_sv) && !sv_utf8_downgrade(ip_address_sv, 1))
 		croak("Wide character in %s", "Socket::pack_sockaddr_in");
 	ip_address = SvPVbyte(ip_address_sv, addrlen);
-	if (addrlen == sizeof(addr) || addrlen == 4)
+        GCC_DIAG_IGNORE(-Wlogical-op)
+        if ((addrlen == sizeof(addr)) || (addrlen == 4))
 		addr.s_addr =
 		    (unsigned int)(ip_address[0] & 0xFF) << 24 |
 		    (unsigned int)(ip_address[1] & 0xFF) << 16 |
@@ -973,6 +987,7 @@ pack_sockaddr_in(port_sv, ip_address_sv)
                       ", should be %" UVuf,
 		      "Socket::pack_sockaddr_in",
 		      (UV)addrlen, (UV)sizeof(addr));
+        GCC_DIAG_RESTORE
 	Zero(&sin, sizeof(sin), char);
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(port);

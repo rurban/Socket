@@ -1,0 +1,46 @@
+This file contains message digests of all files listed in MANIFEST,
+signed via the Module::Signature module, version 0.82.
+
+To verify the content in this distribution, first make sure you have
+Module::Signature installed, then type:
+
+    % cpansign -v
+
+It will check each file's integrity, as well as the signature's
+validity.  If "==> Signature verified OK! <==" is not displayed,
+the distribution may already have been compromised, and you should
+not run its Makefile.PL or Build.PL.
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
+
+SHA256 b7fd9b73ea99602016a326e0b62e6646060d18febdd065ceca8bb482208c3d88 Artistic
+SHA256 bfb29f55507dfef245e55248cea28f8fc98ff49bd818ca9cc0b5b79ea697ba3b Changes
+SHA256 33d29b3f4b12589fe03985f522752b7fd37f04f24aebd3373d1eab69715ca365 Copying
+SHA256 10d8d7904c599e4c9b5639dd38fcbf0016007c02db48fd01bcc03b21b99359c9 LICENSE
+SHA256 bf89677a47982536061c0038c50ade7a61faf94df40e4102f2a16cc8aa7eab35 MANIFEST
+SHA256 303d550d4f7c785d1ef6954763199b715d71b4fb067895c5faaff49c3547030d MANIFEST.SKIP
+SHA256 9c9d573549f0d6b1936dc6bb149905585589069da665889d47f65ddfddd07d7f META.json
+SHA256 637e3d4987df53331241a90c01e0e3687981f7506574bd88eb9ab3be489487cb META.yml
+SHA256 984701d9abed136acb6a41ee71b4039d701ca9a5bbe789a68358382b4464f16b Makefile.PL
+SHA256 218d87b1bf9dd602eb3436ea70d74bcff912d840abf395e38eb7a88e38e04d1f Socket.pm
+SHA256 ff84a6c40defa63bc91de57928752e91d85699b8b120d99e9ec5954d8adb86b1 Socket.xs
+SHA256 111c945faf40720e31e0780edec30baae96c05be145748f8005b485d9c07f44e t/Socket.t
+SHA256 d74802af2c34f6c4df9ebee9831d9f23e0e9d1a473743586346b53a81259bc52 t/getaddrinfo.t
+SHA256 b5b1f658f44c78bba463f7cfc124f642481a7d8325e25ef2afc3d1da40b5ccdf t/getnameinfo.t
+SHA256 a6f003744bdc375336206d825a0c85218913e9a8774b8d00c35eb83810169af6 t/ip_mreq.t
+SHA256 39ff6de6f5f3dacefcc463a8bd512ff900367989a0bc37479f92fcba3036b8ac t/ipv6_mreq.t
+SHA256 d7bec7634e208d7bdb5996788c6de59c4c6cc54c5a7f5883ccd89d54981bdb2e t/sockaddr.t
+SHA256 b62ba0109968701b0622d9d580bbc39b0131c4577231897f718aa698f108fcfd t/socketpair.t
+SHA256 3a97c0d1f7ef385d938e2f3bd99148bda2051c0e150a1998b6bb00d259652845 typemap
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAEBCAAdFiEEKJWogdNCcPq/6PdHtPYzOeZdZBQFAluPsKIACgkQtPYzOeZd
+ZBTXAQf+O4Hj1dRObbu8sJ0PraQZ7zy3EIniZSpFBfJDJ3vVgEWcgx1IcHsBNHqd
+ExpRveQt2nzrFcH9YKcNMXKut0UMXYE+N5XzPv0lNjMm5nb5Q4WnVAb+hXVLIVAL
+ttOiu6AMsfND9aJRJvLixkSZEa+S0ku8kfz92QObsS21Ae6UvbcQpnyBfZ0Udnak
+ogPltvDJDObAMQY2LLaezvkrRkQhT7tlgfa8WFvz7ZkDRdC9TATWjqTILjaE5all
+54GrKaVCXFe7eKl881GbwgZwA3YD6ULQmyHji/W2/iyy9G3P9WftKGe0v3CGMMyC
+VU3GMiJUOf0EWhr3o8iFeyR67CkdHw==
+=bWRy
+-----END PGP SIGNATURE-----
