@@ -1,5 +1,10 @@
 Revision history for Socket
 
+2.028   2019-02-19 23:59:30
+        [CHANGES]
+         * Add PF_LOCAL/AF_LOCAL constants (RT127089)
+         * Provide sockaddr_un on WIN32 (RT128550)
+
 2.027   2018-01-12 16:58:47
         [BUGFIXES]
          * Reimplement croak_sv (securely) for older perls (RT124063)
@@ -22,20 +27,6 @@ Revision history for Socket
            string-pasting macros (thanks Karl Williamson)
          * Fix for machines lacking HAS_SOCKADDR_IN6 (RT116913) (thanks ilmari)
          * Print to STDERR on test failures (RT123436) (thanks ilmari)
-
-2.024_04 2016-10-05 rurban
-        * Fix for cperl I_NETINET6_I6 typo: removed.
-        * Do not include netinet6/in6.h directly
-        * Sign the releases
-
-2.024_03 2016-10-04 rurban
-	* Fixes for OpenBSD: Probe for F<netinet/in_systm.h>
-
-2.024_02 2016-08-27 00:30:50 rurban
-        * Windows fixes w/o IPV6
-
-2.024_01 2016-08-26 19:45:11 rurban
-        * Merge back from cperl RURBAN/Socket-2.021_02.tar.gz
 
 2.024   2016/08/11 13:49:48
         [BUGFIXES]
@@ -60,13 +51,6 @@ Revision history for Socket
 
         [BUGFIXES]
          * Fix coverty complaint (RT111707)
-
-2.021_02 2016-06-06 11:57:00 rurban
-        * Silence -Wlogical-op warnings
-
-2.021_01 2016-04-16 23:35:51 rurban
-        * Add more IPV6 constants.
-        * Include netinet/ip.h, netinet/ip6.h, netinet6/in6.h if valid.
 
 2.021   2015/11/18 17:09:13
         [CHANGES]
