@@ -92,7 +92,7 @@ typedef int socklen_t;
 
 struct sockaddr_un
 {
-     ADDRESS_FAMILY sun_family;
+     USHORT sun_family;
      char sun_path[UNIX_PATH_MAX];
 };
 
