@@ -1,5 +1,12 @@
 Revision history for Socket
 
+2.027_05 2019-04-14 11:23:03 rurban
+         * Re-order and comment deprecated IDN constants as such
+
+2.027_04 Wed Sep 5 12:33:03 2018 rurban
+        [BUGFIXES]
+         * Merge with cperl patches: IPPROTO_ICMPV6, TCP_USER_TIMEOUT
+
 2.027   2018-01-12 16:58:47
         [BUGFIXES]
          * Reimplement croak_sv (securely) for older perls (RT124063)
@@ -22,6 +29,9 @@ Revision history for Socket
            string-pasting macros (thanks Karl Williamson)
          * Fix for machines lacking HAS_SOCKADDR_IN6 (RT116913) (thanks ilmari)
          * Print to STDERR on test failures (RT123436) (thanks ilmari)
+
+2.024_05 Sun Nov 20 18:50:05 2016 rurban
+        * Fix -Wc++11-compat warnings
 
 2.024_04 2016-10-05 rurban
         * Fix for cperl I_NETINET6_I6 typo: removed.
