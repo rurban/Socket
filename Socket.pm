@@ -3,7 +3,7 @@ package Socket;
 use strict;
 { use 5.006001; }
 
-our $VERSION = '2.028_05';
+our $VERSION = '2.029_05';
 our $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
